@@ -10,7 +10,7 @@ SECTION "variables", WRAM0
 
 	def SNAKE_MAX equ 100
 	def SNAKE_SEGMENT_SIZE equ 4
-	def OVERFLOWS_UNTIL_MOVE equ 6 ; no of overflows from the timer before the snake moves 
+	def OVERFLOWS_UNTIL_MOVE equ 4 ; no of overflows from the timer before the snake moves 
 	/*
 		struct Segment{     // size SNAKE_SEGMENT_SIZE ie 4
 			char  x;
@@ -133,7 +133,7 @@ MainLoop:
 	jp MainLoop
 
 initialize_snake:
-	ld a, 5
+	ld a, 4
 	ld [length], a
 	ld a, UP
 	ld [move_direction], a
@@ -174,16 +174,13 @@ iloop:
 	inc b
 	jp iloop
 loop_exit:
-	;ld a, 1
-	;ld [snake_changed], a
+	ld a, 0
+	ld [snake_changed], a
+	
 	ret
 
 set_snake_tiles: ; set snake tiles in vram - vblank ISR
 	di
-	;only set the tiles if the snake has changed
-	ld a, [snake_changed]
-	cp a, 0
-	jp z, set_snake_end
 	
 	; delete last tail
 	ld hl, last_tail
@@ -193,6 +190,11 @@ set_snake_tiles: ; set snake tiles in vram - vblank ISR
 	ld h, b
 	ld l, c
 	ld [hl], 0
+
+	;only set the tiles if the snake has changed
+	ld a, [snake_changed]
+	cp a, 0
+	jp z, set_snake_end
 
 	; prepare for loop
 	ld a, [length]
@@ -222,24 +224,42 @@ segment_loop_end:
 set_snake_end:	
 	reti
 
+
+
 clear_screen: ; not used
+	ld a, 0
+	ld [rLCDC], a
+	ld hl, $9820
+
+cls_loop:
+	ld a, 0
+	ld [hli], a
+	ld a, h
+	cp a, $9a
+	jp nz, cls_loop
+	ld a, l
+	cp a, $5f
+	jp nz, cls_loop
+	; Turn the LCD on
+	ld a, LCDCF_ON | LCDCF_BGON
+	ld [rLCDC], a
+	ret
+/*
 	ld hl, $9820
 	ld a, 0
-	ld b, 16  ; height in tiles (excluding top row)
+	ld b, $10  ; height in tiles (excluding top row)
 	ld c, $13 ; width in tiles
 cls_loop:
 	push hl
-	push af
-	ld a, 0
+		push af
+			ld a, 0
 row_loop:
-
-	ld [hl], 0
-	inc hl
-	inc a
-	cp a, c
-	jp nz, row_loop
-	
-	pop af
+			ld [hl], 0
+			inc hl
+			inc a
+			cp a, c
+			jp nz, row_loop
+		pop af
 	pop hl
 	ld d, 0
 	ld e, $20
@@ -248,6 +268,7 @@ row_loop:
 	cp a, b
 	jp nz, cls_loop
 	ret
+*/
 
 
 get_index:
@@ -327,7 +348,7 @@ up:
 	ld a, [hl]
 	sub a, 1
 	cp a, 0
-	jp z, advance_snake_end
+	jp z, dead
 	ld b, a
 	jp advance_snake_loop
 down:
@@ -337,16 +358,16 @@ down:
 	ld a, [hl]
 	dec hl
 	add a, 1
-	cp a, 32
-	jp z, advance_snake_end
+	cp a, 18
+	jp z, dead
 	ld b, a
 	jp advance_snake_loop
 left:
 	ld hl, snake_array
 	ld a, [hli]
 	sub a, 1
-	cp a, 0
-	jp z, advance_snake_end
+	cp a, -1
+	jp z, dead
 	ld c, a
 	ld a, [hl]
 	ld b, a
@@ -355,12 +376,11 @@ right:
 	ld hl, snake_array
 	ld a, [hli]
 	add a, 1
-	cp a, 32
-	jp z, advance_snake_end
+	cp a, $14
+	jp z, dead
 	ld c, a
 	ld a, [hl]
 	ld b, a
-	jp advance_snake_loop
 advance_snake_loop:
 	ld a, 0
 	ld hl, snake_array
@@ -417,6 +437,10 @@ adv_snake_inner_loop:
 	ld [hl], 1
 advance_snake_end:
 	call poll_input
+	ret
+dead:
+	call clear_screen
+	call initialize_snake
 	ret
 
 clear_snake: ; not used
