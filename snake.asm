@@ -9,7 +9,7 @@ SECTION "variables", WRAM0
 	def STARTY equ 9
 
 	def SNAKE_MAX equ 100
-	def SNAKE_SEGMENT_SIZE equ 4
+	def SNAKE_SEGMENT_SIZE equ 4 ; some code segments have this hard coded as repeated inc hl's - check_self_collision does
 	def OVERFLOWS_UNTIL_MOVE equ 4 ; no of overflows from the timer before the snake moves 
 	/*
 		struct Segment{     // size SNAKE_SEGMENT_SIZE ie 4
@@ -140,10 +140,12 @@ MainLoop:
 advance:
 	di
 	call advance_snake
+
 	WaitVBlank2:
 	ld a, [rLY]
-		cp 144
-		jp c, WaitVBlank2
+	cp 144
+	jp c, WaitVBlank2
+
 	call set_snake_tiles
 	ei
 	ld a, 0
@@ -151,9 +153,26 @@ advance:
 
 	jp MainLoop
 
+memset_snake:
+	ld hl, snake_array
+memset_loop:
+	ld a, $ff
+	ld [hli], a
+	ld a, h
+	cp a, HIGH(snake_array + (SNAKE_MAX * SEGMENT_SIZE))
+	jp z, h_matches
+	jp memset_loop
+h_matches:
+	ld a, l
+	cp a, LOW(snake_array + (SNAKE_MAX * SEGMENT_SIZE))
+	jp z, l_matches
+	jp memset_loop
+l_matches:
+	ret
 
 initialize_snake:
-	ld a, 8
+	;call memset_snake
+	ld a, 6
 	ld [length], a
 	ld a, UP
 	ld [move_direction], a
@@ -202,9 +221,7 @@ loop_exit:
 	
 	ret
 
-set_snake_tiles: ; set snake tiles in vram - vblank ISR
-	
-
+set_snake_tiles: ; set snake tiles in vram 
 	; delete last tail
 	ld hl, last_tail
 	ld b, [hl]
@@ -244,11 +261,12 @@ set_snake_end:
 
 
 
-clear_screen: ; not used
+clear_screen: 
+	; turn off lcd
 	ld a, 0
 	ld [rLCDC], a
+	; clear from 2nd row
 	ld hl, $9820
-
 cls_loop:
 	ld a, 0
 	ld [hli], a
@@ -262,31 +280,7 @@ cls_loop:
 	ld a, LCDCF_ON | LCDCF_BGON
 	ld [rLCDC], a
 	ret
-/*
-	ld hl, $9820
-	ld a, 0
-	ld b, $10  ; height in tiles (excluding top row)
-	ld c, $13 ; width in tiles
-cls_loop:
-	push hl
-		push af
-			ld a, 0
-row_loop:
-			ld [hl], 0
-			inc hl
-			inc a
-			cp a, c
-			jp nz, row_loop
-		pop af
-	pop hl
-	ld d, 0
-	ld e, $20
-	add hl, de
-	inc a
-	cp a, b
-	jp nz, cls_loop
-	ret
-*/
+
 
 
 get_index:
@@ -338,7 +332,6 @@ timer_overflow:
 		jp nz, timer_overflow_end
 		ld a, 0
 		ld [timer_overflow_counter], a
-		;call advance_snake
 		ld a, [should_advance]
 		ld a, 1
 		ld [should_advance], a
@@ -380,7 +373,7 @@ up:
 	cp a, 0
 	jp z, dead
 	ld b, a
-	jp advance_snake_loop_setup
+	jp check_collision_with_self
 down:
 	ld hl, snake_array
 	ld a, [hli]
@@ -391,7 +384,7 @@ down:
 	cp a, 18
 	jp z, dead
 	ld b, a
-	jp advance_snake_loop_setup
+	jp check_collision_with_self
 left:
 	ld hl, snake_array
 	ld a, [hli]
@@ -401,7 +394,7 @@ left:
 	ld c, a
 	ld a, [hl]
 	ld b, a
-	jp advance_snake_loop_setup
+	jp check_collision_with_self
 right:
 	ld hl, snake_array
 	ld a, [hli]
@@ -411,7 +404,8 @@ right:
 	ld c, a
 	ld a, [hl]
 	ld b, a
-advance_snake_loop_setup:
+check_collision_with_self:
+	
 	ld a, 0
 	ld hl, snake_array
 adv_snake_loop:
@@ -466,38 +460,63 @@ adv_snake_loop:
 	ld hl, snake_changed
 	ld [hl], 1
 advance_snake_end:
-	
+	ld hl, snake_array
+	ld c, [hl]
+	inc hl
+	ld b, [hl]
+	call check_self_collision
+	cp a, 1
+	jp z, dead
 	ret
 dead:
 	call clear_screen
 	call initialize_snake
 	ret
 
-clear_snake: ; not used
-	ld a, 0
-	ld hl, length
-	ld a, [hl]
-	ld hl, snake_array + 2
-	ld d, 0
-	ld e, SNAKE_SEGMENT_SIZE
-clear_snake_loop:
+check_self_collision:
+	;  y in b and x in c
+	push de
 	push hl
-	ld b, [hl]
-	inc hl
-	ld c, [hl]
-	ld h, b
-	ld l, c
-	ld [hl], 0
-	pop hl
-	;ld b, 0
-	;ld c, SNAKE_SEGMENT_SIZE
-	add hl, de
-	dec a
-	cp a, 0
-	jp nz, clear_snake_loop
-clear_snake_end:
-	ret
 
+		ld hl, snake_array + SNAKE_SEGMENT_SIZE ; ptr to 2 tiles after head
+		ld d, 0
+		ld a, [length]
+		;sub a, 1
+		ld e, a
+self_collision_loop:
+		
+		; check head against this segment
+		ld a, [hli]
+		cp a, c
+		jp z, same_x
+		
+mid_loop:
+		inc hl
+		; increment ptr
+		inc hl
+		inc hl
+		inc d
+		ld a, d
+		cp a, e
+		jp nz, self_collision_loop
+
+		jp end
+
+same_x:
+		ld a, [hl]
+		cp a, b
+		jp z, same_y
+		jp mid_loop
+same_y:
+		ld a, 1
+		jp end
+no_collision:
+		ld a, 0
+		jp end
+end:
+	pop hl
+	pop de
+	ret
 
 poll_input:
 	
