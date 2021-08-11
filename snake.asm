@@ -20,11 +20,11 @@ SECTION "variables", WRAM0
 	*/
 	snake_array: ds SNAKE_MAX * SNAKE_SEGMENT_SIZE
 	last_tail: ds 2
+	last_direction: ds 1
 	move_direction: ds 1
 	length: ds 1
 	snake_changed: ds 1
 	timer_overflow_counter: ds 1
-	last_arrows: ds 1
 	should_advance: ds 1
 
 SECTION	"Vblank",ROM0[$0040]
@@ -131,7 +131,7 @@ WaitVBlank1:
 	ld a, 0
 	ld [should_advance], a
 MainLoop:
-	;call poll_input
+	call poll_input
 	ld a, [should_advance]
 	cp a, 1
 	jp z, advance
@@ -150,6 +150,9 @@ initialize_snake:
 	ld [length], a
 	ld a, UP
 	ld [move_direction], a
+
+	ld a, UP
+	ld [last_direction], a
 
 	ld b, 0
 	ld hl, snake_array
@@ -195,6 +198,9 @@ loop_exit:
 set_snake_tiles: ; set snake tiles in vram - vblank ISR
 	di
 	push af
+	push hl
+	push bc
+	push de
 	; delete last tail
 	ld hl, last_tail
 	ld b, [hl]
@@ -235,6 +241,9 @@ segment_loop_end:
 	ld a, 0
 	ld [snake_changed], a
 set_snake_end:	
+	pop de
+	pop bc
+	pop hl
 	pop af
 	reti
 
@@ -321,6 +330,9 @@ rowsloopend:
 ; timer ISR
 timer_overflow:
 	push af
+	push hl
+	push bc
+	push de
 		; OVERFLOWS_UNTIL_MOVE - advance snake will be called when
 		; the timer overflows this many times. then the overflow counter
 		; will be set back to 0. Timer is ~4194Hz
@@ -336,6 +348,9 @@ timer_overflow:
 		ld a, 1
 		ld [should_advance], a
 timer_overflow_end:
+	pop de
+	pop bc
+	pop hl
 	pop af
 	reti
 
@@ -346,8 +361,8 @@ advance_snake:
 	cp a, 0
 	jp nz, advance_snake_end
 
-	ld hl, move_direction
-	ld a, [hl]
+	ld a, [move_direction]
+	ld [last_direction], a
 	cp a, UP
 	jp z, up
 	cp a, DOWN
@@ -370,7 +385,7 @@ up:
 	cp a, 0
 	jp z, dead
 	ld b, a
-	jp advance_snake_loop
+	jp advance_snake_loop_setup
 down:
 	ld hl, snake_array
 	ld a, [hli]
@@ -381,7 +396,7 @@ down:
 	cp a, 18
 	jp z, dead
 	ld b, a
-	jp advance_snake_loop
+	jp advance_snake_loop_setup
 left:
 	ld hl, snake_array
 	ld a, [hli]
@@ -391,7 +406,7 @@ left:
 	ld c, a
 	ld a, [hl]
 	ld b, a
-	jp advance_snake_loop
+	jp advance_snake_loop_setup
 right:
 	ld hl, snake_array
 	ld a, [hli]
@@ -401,10 +416,10 @@ right:
 	ld c, a
 	ld a, [hl]
 	ld b, a
-advance_snake_loop:
+advance_snake_loop_setup:
 	ld a, 0
 	ld hl, snake_array
-adv_snake_inner_loop:
+adv_snake_loop:
 	; store old x,y position in de
 	ld d, [hl]
 	inc hl
@@ -451,12 +466,12 @@ adv_snake_inner_loop:
 	pop hl
 	inc a
 	cp a, d
-	jp nz, adv_snake_inner_loop
+	jp nz, adv_snake_loop
 	; set snake_changed flag
 	ld hl, snake_changed
 	ld [hl], 1
 advance_snake_end:
-	call poll_input
+	
 	ret
 dead:
 	call clear_screen
@@ -509,44 +524,43 @@ poll_input:
 
 	jp poll_input_end
 up_pressed:
-	ld hl, move_direction
-	ld a, [hl]
+	ld a, [last_direction]
 	cp a, UP
 	jp z, poll_input_end
 	cp a, DOWN
 	jp z, poll_input_end
 	ld a, UP
-	ld [hl], a
+	ld [move_direction], a
 	jp poll_input_end
 down_pressed:
 	ld hl, move_direction
-	ld a, [hl]
+	ld a, [last_direction]
 	cp a, UP
 	jp z, poll_input_end
 	cp a, DOWN
 	jp z, poll_input_end
 	ld a, DOWN
-	ld [hl], a
+	ld [move_direction], a
 	jp poll_input_end
 left_pressed:
 	ld hl, move_direction
-	ld a, [hl]
+	ld a, [last_direction]
 	cp a, LEFT
 	jp z, poll_input_end
 	cp a, RIGHT
 	jp z, poll_input_end
 	ld a, LEFT
-	ld [hl], a
+	ld [move_direction], a
 	jp poll_input_end
 right_pressed:
 	ld hl, move_direction
-	ld a, [hl]
+	ld a, [last_direction]
 	cp a, LEFT
 	jp z, poll_input_end
 	cp a, RIGHT
 	jp z, poll_input_end
 	ld a, RIGHT
-	ld [hl], a
+	ld [move_direction], a
 
 poll_input_end:
 	ret
