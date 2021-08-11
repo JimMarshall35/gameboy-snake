@@ -10,7 +10,7 @@ SECTION "variables", WRAM0
 
 	def SNAKE_MAX equ 100
 	def SNAKE_SEGMENT_SIZE equ 4 ; some code segments have this hard coded as repeated inc hl's - check_self_collision does
-	def OVERFLOWS_UNTIL_MOVE equ 4 ; no of overflows from the timer before the snake moves 
+	def OVERFLOWS_UNTIL_MOVE equ 3 ; no of overflows from the timer before the snake moves 
 	/*
 		struct Segment{     // size SNAKE_SEGMENT_SIZE ie 4
 			char  x;
@@ -133,24 +133,27 @@ WaitVBlank1:
 	ld [should_advance], a
 MainLoop:
 	call poll_input
+	; check if the timer interrupt has signalled its time to advance the snake
 	ld a, [should_advance]
 	cp a, 1
+	; if it is, goto advance
 	jp z, advance
+	; if not goto mainloop
 	jp MainLoop
 advance:
 	di
-	call advance_snake
-
-	WaitVBlank2:
-	ld a, [rLY]
-	cp 144
-	jp c, WaitVBlank2
-
-	call set_snake_tiles
+		call advance_snake
+		; wait for vblank before setting the snakes new tiles
+		WaitVBlank2:
+		ld a, [rLY]
+		cp 144
+		jp c, WaitVBlank2
+		call set_snake_tiles
 	ei
+	; set should_advance to false
 	ld a, 0
 	ld [should_advance], a
-
+	; goto mainloop
 	jp MainLoop
 
 memset_snake:
@@ -159,12 +162,12 @@ memset_loop:
 	ld a, $ff
 	ld [hli], a
 	ld a, h
-	cp a, HIGH(snake_array + (SNAKE_MAX * SEGMENT_SIZE))
+	cp a, HIGH(snake_array + (SNAKE_MAX * SNAKE_SEGMENT_SIZE))
 	jp z, h_matches
 	jp memset_loop
 h_matches:
 	ld a, l
-	cp a, LOW(snake_array + (SNAKE_MAX * SEGMENT_SIZE))
+	cp a, LOW(snake_array + (SNAKE_MAX * SNAKE_SEGMENT_SIZE))
 	jp z, l_matches
 	jp memset_loop
 l_matches:
@@ -373,7 +376,7 @@ up:
 	cp a, 0
 	jp z, dead
 	ld b, a
-	jp check_collision_with_self
+	jp adv_snake_loop_setup
 down:
 	ld hl, snake_array
 	ld a, [hli]
@@ -384,7 +387,7 @@ down:
 	cp a, 18
 	jp z, dead
 	ld b, a
-	jp check_collision_with_self
+	jp adv_snake_loop_setup
 left:
 	ld hl, snake_array
 	ld a, [hli]
@@ -394,7 +397,7 @@ left:
 	ld c, a
 	ld a, [hl]
 	ld b, a
-	jp check_collision_with_self
+	jp adv_snake_loop_setup
 right:
 	ld hl, snake_array
 	ld a, [hli]
@@ -404,7 +407,7 @@ right:
 	ld c, a
 	ld a, [hl]
 	ld b, a
-check_collision_with_self:
+adv_snake_loop_setup:
 	
 	ld a, 0
 	ld hl, snake_array
@@ -469,8 +472,9 @@ advance_snake_end:
 	jp z, dead
 	ret
 dead:
-	call clear_screen
+	
 	call initialize_snake
+	call clear_screen
 	ret
 
 check_self_collision:
