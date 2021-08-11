@@ -28,7 +28,8 @@ SECTION "variables", WRAM0
 	should_advance: ds 1
 
 SECTION	"Vblank",ROM0[$0040]
-	call set_snake_tiles
+	;call set_snake_tiles
+	reti
 	
 SECTION	"stat",ROM0[$0048]
 	reti
@@ -139,14 +140,20 @@ MainLoop:
 advance:
 	di
 	call advance_snake
+	WaitVBlank2:
+	ld a, [rLY]
+		cp 144
+		jp c, WaitVBlank2
+	call set_snake_tiles
 	ei
 	ld a, 0
 	ld [should_advance], a
+
 	jp MainLoop
 
 
 initialize_snake:
-	ld a, 4
+	ld a, 8
 	ld [length], a
 	ld a, UP
 	ld [move_direction], a
@@ -196,11 +203,8 @@ loop_exit:
 	ret
 
 set_snake_tiles: ; set snake tiles in vram - vblank ISR
-	di
-	push af
-	push hl
-	push bc
-	push de
+	
+
 	; delete last tail
 	ld hl, last_tail
 	ld b, [hl]
@@ -209,11 +213,6 @@ set_snake_tiles: ; set snake tiles in vram - vblank ISR
 	ld h, b
 	ld l, c
 	ld [hl], 0
-
-	;only set the tiles if the snake has changed
-	ld a, [snake_changed]
-	cp a, 0
-	jp z, set_snake_end
 
 	; prepare for loop
 	ld a, [length]
@@ -241,10 +240,6 @@ segment_loop_end:
 	ld a, 0
 	ld [snake_changed], a
 set_snake_end:	
-	pop de
-	pop bc
-	pop hl
-	pop af
 	reti
 
 
