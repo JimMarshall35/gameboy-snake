@@ -25,6 +25,7 @@ SECTION "variables", WRAM0
 	snake_changed: ds 1
 	timer_overflow_counter: ds 1
 	last_arrows: ds 1
+	should_advance: ds 1
 
 SECTION	"Vblank",ROM0[$0040]
 	call set_snake_tiles
@@ -127,10 +128,22 @@ WaitVBlank1:
 	ld [rBGP], a
 
 	ei
+	ld a, 0
+	ld [should_advance], a
 MainLoop:
 	;call poll_input
-
+	ld a, [should_advance]
+	cp a, 1
+	jp z, advance
 	jp MainLoop
+advance:
+	di
+	call advance_snake
+	ei
+	ld a, 0
+	ld [should_advance], a
+	jp MainLoop
+
 
 initialize_snake:
 	ld a, 4
@@ -181,7 +194,7 @@ loop_exit:
 
 set_snake_tiles: ; set snake tiles in vram - vblank ISR
 	di
-	
+	push af
 	; delete last tail
 	ld hl, last_tail
 	ld b, [hl]
@@ -222,6 +235,7 @@ segment_loop_end:
 	ld a, 0
 	ld [snake_changed], a
 set_snake_end:	
+	pop af
 	reti
 
 
@@ -306,17 +320,23 @@ rowsloopend:
 
 ; timer ISR
 timer_overflow:
-	; OVERFLOWS_UNTIL_MOVE - advance snake will be called when
-	; the timer overflows this many times. then the overflow counter
-	; will be set back to 0. Timer is ~4194Hz
-	ld hl, timer_overflow_counter
-	inc [hl]
-	ld a, [hl]
-	cp a, OVERFLOWS_UNTIL_MOVE
-	jp nz, timer_overflow_end
-	ld [hl], 0
-	call advance_snake
+	push af
+		; OVERFLOWS_UNTIL_MOVE - advance snake will be called when
+		; the timer overflows this many times. then the overflow counter
+		; will be set back to 0. Timer is ~4194Hz
+		ld a, [timer_overflow_counter]
+		inc a
+		ld [timer_overflow_counter], a
+		cp a, OVERFLOWS_UNTIL_MOVE
+		jp nz, timer_overflow_end
+		ld a, 0
+		ld [timer_overflow_counter], a
+		;call advance_snake
+		ld a, [should_advance]
+		ld a, 1
+		ld [should_advance], a
 timer_overflow_end:
+	pop af
 	reti
 
 advance_snake:
@@ -527,6 +547,7 @@ right_pressed:
 	jp z, poll_input_end
 	ld a, RIGHT
 	ld [hl], a
+
 poll_input_end:
 	ret
 
