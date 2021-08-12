@@ -1,6 +1,22 @@
 INCLUDE "hardware.inc"
 def VBLANK_IE_BIT equ 0
 SECTION "variables", WRAM0
+
+	def SPRITE_HU equ	0
+	def SPRITE_HD equ	1
+	def SPRITE_HL equ	2
+	def SPRITE_HR equ	3
+	def SPRITE_L2R equ	13
+	def SPRITE_U2D equ	12
+	def SPRITE_R2D equ	8
+	def SPRITE_R2U equ	11
+	def SPRITE_L2D equ	9
+	def SPRITE_L2U equ	10
+	def SPRITE_TU equ	4
+	def SPRITE_TD equ	5
+	def SPRITE_TL equ	6
+	def SPRITE_TR equ	7
+ 
 	def UP equ 0
 	def DOWN equ 1
 	def LEFT equ 2 
@@ -482,10 +498,10 @@ check_self_collision:
 	push de
 	push hl
 
-		ld hl, snake_array + SNAKE_SEGMENT_SIZE ; ptr to 2 tiles after head
+		ld hl, snake_array + SNAKE_SEGMENT_SIZE*2 ; ptr to 2 tiles after head
 		ld d, 0
 		ld a, [length]
-		;sub a, 1
+		sub a, 2
 		ld e, a
 self_collision_loop:
 		
