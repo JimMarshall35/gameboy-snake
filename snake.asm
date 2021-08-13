@@ -615,6 +615,7 @@ poll_input:
 
 	jp poll_input_end
 up_pressed:
+	call RandomNumber
 	ld a, [last_direction]
 	cp a, UP
 	jp z, poll_input_end
@@ -624,6 +625,7 @@ up_pressed:
 	ld [move_direction], a
 	jp poll_input_end
 down_pressed:
+	call RandomNumber
 	ld hl, move_direction
 	ld a, [last_direction]
 	cp a, UP
@@ -634,6 +636,7 @@ down_pressed:
 	ld [move_direction], a
 	jp poll_input_end
 left_pressed:
+	call RandomNumber
 	ld hl, move_direction
 	ld a, [last_direction]
 	cp a, LEFT
@@ -644,6 +647,7 @@ left_pressed:
 	ld [move_direction], a
 	jp poll_input_end
 right_pressed:
+	call RandomNumber
 	ld hl, move_direction
 	ld a, [last_direction]
 	cp a, LEFT
@@ -654,6 +658,11 @@ right_pressed:
 	ld [move_direction], a
 
 poll_input_end:
+	ld a, [rP1]
+	and %11011111
+	ld [rP1], a
+	ld a, [rP1]
+	ld a, [rP1]
 	ret
 
 SECTION "Tile data", ROM0
