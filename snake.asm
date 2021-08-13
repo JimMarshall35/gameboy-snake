@@ -2,20 +2,21 @@ INCLUDE "hardware.inc"
 def VBLANK_IE_BIT equ 0
 SECTION "variables", WRAM0
 
-	def SPRITE_HU equ	0
-	def SPRITE_HD equ	1
-	def SPRITE_HL equ	2
-	def SPRITE_HR equ	3
-	def SPRITE_L2R equ	13
-	def SPRITE_U2D equ	12
-	def SPRITE_R2D equ	8
-	def SPRITE_R2U equ	11
-	def SPRITE_L2D equ	9
-	def SPRITE_L2U equ	10
-	def SPRITE_TU equ	4
-	def SPRITE_TD equ	5
-	def SPRITE_TL equ	6
-	def SPRITE_TR equ	7
+	def SPRITE_HU equ	1
+	def SPRITE_HD equ	2
+	def SPRITE_HL equ	3
+	def SPRITE_HR equ	4
+	def SPRITE_L2R equ	14
+	def SPRITE_U2D equ	13
+	def SPRITE_R2D equ	9
+	def SPRITE_R2U equ	12
+	def SPRITE_L2D equ	10
+	def SPRITE_L2U equ	11
+	def SPRITE_TU equ	5
+	def SPRITE_TD equ	6
+	def SPRITE_TL equ	7
+	def SPRITE_TR equ	8
+	def SPRITE_FOOD equ 15
  
 	def UP equ 0
 	def DOWN equ 1
@@ -42,9 +43,15 @@ SECTION "variables", WRAM0
 	snake_changed: ds 1
 	timer_overflow_counter: ds 1
 	should_advance: ds 1
+	food: ds 4 ; x, y, vram_address
+
+	; random number generation
+	Seed: ds 2
+	RandomPtr: ds 1
+
 
 SECTION	"Vblank",ROM0[$0040]
-	;call set_snake_tiles
+	;call vram_set
 	reti
 	
 SECTION	"stat",ROM0[$0048]
@@ -164,7 +171,7 @@ advance:
 		ld a, [rLY]
 		cp 144
 		jp c, WaitVBlank2
-		call set_snake_tiles
+		call vram_set
 	ei
 	; set should_advance to false
 	ld a, 0
@@ -189,7 +196,36 @@ h_matches:
 l_matches:
 	ret
 
+test_set_pellet:
+	call RandomNumber
+	and %00001111
+	inc a
+	ld [food], a 
+
+	call RandomNumber
+	and %00001111
+	inc a
+	ld [food + 1], a 
+
+
+	
+	ld de, 0
+
+	ld b, a
+	ld a, [food]
+	ld c, a
+
+	call get_index
+	ld hl, $9800
+	add hl, de
+	ld a, h
+	ld [food + 2], a
+	ld a, l
+	ld [food + 3], a
+	ret
+
 initialize_snake:
+	call test_set_pellet
 	;call memset_snake
 	ld a, 6
 	ld [length], a
@@ -240,7 +276,7 @@ loop_exit:
 	
 	ret
 
-set_snake_tiles: ; set snake tiles in vram 
+vram_set: ; set snake tiles in vram 
 	; delete last tail
 	ld hl, last_tail
 	ld b, [hl]
@@ -276,7 +312,12 @@ segment_loop_end:
 	ld a, 0
 	ld [snake_changed], a
 set_snake_end:	
-	reti
+	ld a, [food + 2]
+	ld h, a
+	ld a, [food + 3]
+	ld l, a
+	ld [hl], SPRITE_FOOD
+	ret
 
 
 
@@ -392,7 +433,7 @@ up:
 	cp a, 0
 	jp z, dead
 	ld b, a
-	jp adv_snake_loop_setup
+	jp check_food_eaten
 down:
 	ld hl, snake_array
 	ld a, [hli]
@@ -403,7 +444,7 @@ down:
 	cp a, 18
 	jp z, dead
 	ld b, a
-	jp adv_snake_loop_setup
+	jp check_food_eaten
 left:
 	ld hl, snake_array
 	ld a, [hli]
@@ -413,7 +454,7 @@ left:
 	ld c, a
 	ld a, [hl]
 	ld b, a
-	jp adv_snake_loop_setup
+	jp check_food_eaten
 right:
 	ld hl, snake_array
 	ld a, [hli]
@@ -423,8 +464,24 @@ right:
 	ld c, a
 	ld a, [hl]
 	ld b, a
+check_food_eaten:
+	ld a, [food]
+	cp a, c
+	jp z, x_food_same
+	jp adv_snake_loop_setup
+x_food_same:
+	ld a, [food + 1]
+	cp a, b
+	jp z, y_food_same
+	jp adv_snake_loop_setup
+y_food_same:
+	ld a, [length]
+	inc a
+	ld [length], a
+	push bc
+		call test_set_pellet
+	pop bc
 adv_snake_loop_setup:
-	
 	ld a, 0
 	ld hl, snake_array
 adv_snake_loop:
@@ -602,36 +659,38 @@ poll_input_end:
 SECTION "Tile data", ROM0
 
 Tiles:
-	DB $00,$00,$00,$00,$00,$00,$00,$00
-	DB $00,$00,$00,$00,$00,$00,$00,$00
-	DB $18,$18,$24,$3C,$42,$7E,$A5,$FF
-	DB $A5,$FF,$A5,$FF,$81,$FF,$42,$7E
-	DB $42,$7E,$81,$FF,$A5,$FF,$A5,$FF
-	DB $A5,$FF,$42,$7E,$24,$3C,$18,$18
-	DB $1E,$1E,$21,$3F,$5C,$7F,$80,$FF
-	DB $80,$FF,$5C,$7F,$21,$3F,$1E,$1E
-	DB $78,$78,$84,$FC,$3A,$FE,$01,$FF
-	DB $01,$FF,$3A,$FE,$84,$FC,$78,$78
-	DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
-	DB $42,$7E,$42,$7E,$24,$3C,$18,$18
-	DB $18,$18,$24,$3C,$42,$7E,$42,$7E
-	DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
-	DB $00,$00,$FC,$FC,$02,$FE,$01,$FF
-	DB $01,$FF,$02,$FE,$FC,$FC,$00,$00
-	DB $00,$00,$3F,$3F,$40,$7F,$80,$FF
-	DB $80,$FF,$40,$7F,$3F,$3F,$00,$00
-	DB $00,$00,$1F,$1F,$20,$3F,$40,$7F
-	DB $40,$7F,$40,$7F,$43,$7F,$42,$7E
-	DB $00,$00,$F8,$F8,$04,$FC,$02,$FE
-	DB $02,$FE,$02,$FE,$C2,$FE,$42,$7E
-	DB $42,$7E,$C2,$FE,$02,$FE,$02,$FE
-	DB $02,$FE,$04,$FC,$F8,$F8,$00,$00
-	DB $42,$7E,$43,$7F,$40,$7F,$40,$7F
-	DB $40,$7F,$20,$3F,$1F,$1F,$00,$00
-	DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
-	DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
-	DB $00,$00,$FF,$FF,$00,$FF,$00,$FF
-	DB $00,$FF,$00,$FF,$FF,$FF,$00,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00
+DB $18,$18,$24,$3C,$42,$7E,$A5,$FF
+DB $A5,$FF,$A5,$FF,$81,$FF,$42,$7E
+DB $42,$7E,$81,$FF,$A5,$FF,$A5,$FF
+DB $A5,$FF,$42,$7E,$24,$3C,$18,$18
+DB $1E,$1E,$21,$3F,$5C,$7F,$80,$FF
+DB $80,$FF,$5C,$7F,$21,$3F,$1E,$1E
+DB $78,$78,$84,$FC,$3A,$FE,$01,$FF
+DB $01,$FF,$3A,$FE,$84,$FC,$78,$78
+DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
+DB $42,$7E,$42,$7E,$24,$3C,$18,$18
+DB $18,$18,$24,$3C,$42,$7E,$42,$7E
+DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
+DB $00,$00,$FC,$FC,$02,$FE,$01,$FF
+DB $01,$FF,$02,$FE,$FC,$FC,$00,$00
+DB $00,$00,$3F,$3F,$40,$7F,$80,$FF
+DB $80,$FF,$40,$7F,$3F,$3F,$00,$00
+DB $00,$00,$1F,$1F,$20,$3F,$40,$7F
+DB $40,$7F,$40,$7F,$43,$7F,$42,$7E
+DB $00,$00,$F8,$F8,$04,$FC,$02,$FE
+DB $02,$FE,$02,$FE,$C2,$FE,$42,$7E
+DB $42,$7E,$C2,$FE,$02,$FE,$02,$FE
+DB $02,$FE,$04,$FC,$F8,$F8,$00,$00
+DB $42,$7E,$43,$7F,$40,$7F,$40,$7F
+DB $40,$7F,$20,$3F,$1F,$1F,$00,$00
+DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
+DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
+DB $00,$00,$FF,$FF,$00,$FF,$00,$FF
+DB $00,$FF,$00,$FF,$FF,$FF,$00,$00
+DB $0E,$0E,$36,$36,$64,$64,$46,$46
+DB $FF,$FF,$FF,$99,$FF,$DF,$73,$73
 TilesEnd:
 
 SECTION "Tilemap", ROM0
@@ -656,3 +715,149 @@ Tilemap:
 	db $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,  0,0,0,0,0,0,0,0,0,0,0,0
 	db $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,  0,0,0,0,0,0,0,0,0,0,0,0
 TilemapEnd:
+
+; ********************************
+
+; *   Random Number Generation   *
+
+; ********************************
+
+;
+
+;> Anyone have RGBDS (or other z80) random number code they'd like to share?
+
+;
+
+;  I think Luc on the GB dev web ring has some code on his page.
+
+;
+
+;  You can either calculate it as you go or use a lookup table.
+
+;
+
+;  Here are some examples for 8-bit random numbers. You should
+
+; call one of these routines everytime a button is pressed to
+
+; maximize randomness. Also, using the divider register ($fff4)
+
+; helps increase randomness as well:
+
+
+
+
+
+;* Random # - Calculate as you go *
+
+; (Allocate 3 bytes of ram labeled 'Seed')
+
+; Exit: A = 0-255, random number
+
+
+
+RandomNumber:
+
+        ld      hl,Seed
+
+        ld      a,[hli]
+
+        sra     a
+
+        sra     a
+
+        sra     a
+
+        xor     [hl]
+
+        inc     hl
+
+        rra
+
+        rl      [hl]
+
+        dec     hl
+
+        rl      [hl]
+
+        dec     hl
+
+        rl      [hl]
+
+        ld      a,[$fff4]          ; get divider register to increase randomness
+
+        add     [hl]
+
+        ret
+
+
+
+;* Random # - Use lookup table *
+
+; (Allocate 1 byte of ram labeled 'RandomPtr')
+
+; Exit: A = 0-255, random number
+
+
+
+RandomNumber_LUT:
+
+        push    hl
+
+        ld      a,[RandomPtr]
+
+        inc     a
+
+        ld      [RandomPtr],a
+
+        ld      hl,RandTable
+
+        add     a,l
+
+        ld      l,a
+
+        jr      nc,.skip
+
+        inc     h
+
+.skip:  ld      a,[hl]
+
+        pop     hl
+
+        ret
+
+
+
+RandTable:
+
+        db      $3B,$02,$B7,$6B,$08,$74,$1A,$5D,$21,$99,$95,$66,$D5,$59,$05,$42
+
+        db      $F8,$03,$0F,$53,$7D,$8F,$57,$FB,$48,$26,$F2,$4A,$3D,$E4,$1D,$D9
+
+        db      $9D,$DC,$2F,$F5,$92,$5C,$CC,$00,$73,$15,$BF,$B1,$BB,$EB,$9E,$2E
+
+        db      $32,$FC,$4B,$CD,$A7,$E6,$C2,$10,$11,$80,$52,$B2,$DA,$77,$4F,$EC
+
+        db      $13,$54,$64,$ED,$94,$8C,$C6,$9A,$19,$9F,$75,$FA,$AA,$8D,$FE,$91
+
+        db      $01,$23,$07,$C1,$40,$18,$51,$76,$3C,$BD,$2A,$88,$2D,$F1,$8A,$72
+
+        db      $F6,$98,$35,$97,$68,$93,$B3,$0C,$82,$4E,$CB,$39,$D8,$5F,$C7,$D4
+
+        db      $CE,$AE,$6D,$A3,$7C,$6A,$B8,$A6,$6F,$5E,$E5,$1B,$F4,$B5,$3A,$14
+
+        db      $78,$FD,$D0,$7A,$47,$2C,$A8,$1E,$EA,$2B,$9C,$86,$83,$E1,$7B,$71
+
+        db      $F0,$FF,$D1,$C3,$DB,$0E,$46,$1C,$C9,$16,$61,$55,$AD,$36,$81,$F3
+
+        db      $DF,$43,$C5,$B4,$AF,$79,$7F,$AC,$F9,$37,$E7,$0A,$22,$D3,$A0,$5A
+
+        db      $06,$17,$EF,$67,$60,$87,$20,$56,$45,$D7,$6E,$58,$A9,$B0,$62,$BA
+
+        db      $E3,$0D,$25,$09,$DE,$44,$49,$69,$9B,$65,$B9,$E0,$41,$A4,$6C,$CF
+
+        db      $A1,$31,$D6,$29,$A2,$3F,$E2,$96,$34,$EE,$DD,$C0,$CA,$63,$33,$5B
+
+        db      $70,$27,$F7,$1F,$BE,$12,$B6,$50,$BC,$4D,$28,$C8,$84,$30,$A5,$4C
+
+        db      $AB,$E9,$8E,$E8,$7E,$C4,$89,$8B,$0B,$24,$85,$3E,$38,$04,$D2,$90
