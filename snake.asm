@@ -196,7 +196,7 @@ h_matches:
 l_matches:
 	ret
 
-test_set_pellet:
+set_pellet:
 	call RandomNumber
 	and %00001111
 	inc a
@@ -225,7 +225,7 @@ test_set_pellet:
 	ret
 
 initialize_snake:
-	call test_set_pellet
+	call set_pellet
 	;call memset_snake
 	ld a, 6
 	ld [length], a
@@ -479,7 +479,7 @@ y_food_same:
 	inc a
 	ld [length], a
 	push bc
-		call test_set_pellet
+		call set_pellet
 	pop bc
 adv_snake_loop_setup:
 	ld a, 0
@@ -716,6 +716,10 @@ Tilemap:
 	db $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,  0,0,0,0,0,0,0,0,0,0,0,0
 TilemapEnd:
 
+/*
+	ALL CODE BELOW IS FROM:
+	http://www.devrs.com/gb/asmcode.php#random
+*/
 ; ********************************
 
 ; *   Random Number Generation   *
