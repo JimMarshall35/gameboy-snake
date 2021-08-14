@@ -8,8 +8,14 @@ The snake is part of the background tile layer to allow for a massive snake. The
 Made from the "Hello world" example here as a starting point: https://eldred.fr/gb-asm-tutorial/part1/hello_world.html
 
 To do:
--> make the correct tile for be drawn for each part of the snake
+-> make the correct tile be drawn for each part of the snake
+
 -> have timed food pellets that you have to be quick to reach in time before they disappear - these could be sprites that swoop in and out from off the screen
+
 -> add music
+
 -> add a menu screen
+
 -> add scoring, score display on the top row of tiles
+
+-> stop food from spawning in the snake (food can sometimes spawn in the exact same place it was just eaten from - making it look like the snake didn't eat the food)
