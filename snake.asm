@@ -26,13 +26,14 @@ SECTION "variables", WRAM0
 	def STARTY equ 9
 
 	def SNAKE_MAX equ 100
-	def SNAKE_SEGMENT_SIZE equ 4 ; some code segments have this hard coded as repeated inc hl's - check_self_collision does
+	def SNAKE_SEGMENT_SIZE equ 5 ; some code segments have this hard coded as repeated inc hl's - check_self_collision does
 	def OVERFLOWS_UNTIL_MOVE equ 3 ; no of overflows from the timer before the snake moves 
 	/*
 		struct Segment{     // size SNAKE_SEGMENT_SIZE ie 4
 			char  x;
 			char  y;
 			char* tile_addr; // tile address in vram
+			char  tile_index;
 		}
 	*/
 	snake_array: ds SNAKE_MAX * SNAKE_SEGMENT_SIZE
@@ -40,7 +41,6 @@ SECTION "variables", WRAM0
 	last_direction: ds 1
 	move_direction: ds 1
 	length: ds 1
-	snake_changed: ds 1
 	timer_overflow_counter: ds 1
 	should_advance: ds 1
 	food: ds 4 ; x, y, vram_address
@@ -209,15 +209,14 @@ set_pellet:
 
 
 	
-	ld de, 0
 
 	ld b, a
 	ld a, [food]
 	ld c, a
 
-	call get_index
-	ld hl, $9800
-	add hl, de
+	call get_vram_from_xy
+	ld h, d
+	ld l, e
 	ld a, h
 	ld [food + 2], a
 	ld a, l
@@ -249,31 +248,24 @@ iloop:
 
 	push hl
 	push bc
-	ld h, $98
-	ld l, $00
-	ld de, 0
-
-	ld b, a  ; a is still set to the y coord - store in b
-	ld c, STARTX
-
-	call get_index
-
-    add hl, de
-    ld d, h
-    ld e, l
+		ld b, a  ; a is still set to the y coord - store in b
+		ld c, STARTX
+		call get_vram_from_xy
     pop bc
 	pop hl
+	; set vram pointer
 	ld a, d
 	ld [hli], a
 	ld a, e
 	ld [hli], a
+
+	; set tile index
+	ld a, 1
+	ld [hli], a
 	
 	inc b
 	jp iloop
-loop_exit:
-	ld a, 0
-	ld [snake_changed], a
-	
+loop_exit:	
 	ret
 
 vram_set: ; set snake tiles in vram 
@@ -296,11 +288,15 @@ segment_loop:
 	ld d, [hl]
 	inc hl
 	ld e, [hl]
-	dec hl
+	inc hl
+	; hl now pointing to tile index
+	;dec hl
 	ld b, a
 	;push af ; caching a into b faster than push / pop of af
-	ld a, 1
+	ld a, [hl]
 	ld [de], a
+	dec hl
+	dec hl
 	;pop af
 	ld a, b
 	ld b, 0
@@ -308,10 +304,6 @@ segment_loop:
 	cp a, 0
 	jp nz, segment_loop
 segment_loop_end:
-	; the snake has been drawn - set the snake_changed flag to false
-	ld a, 0
-	ld [snake_changed], a
-set_snake_end:	
 	ld a, [food + 2]
 	ld h, a
 	ld a, [food + 3]
@@ -322,6 +314,7 @@ set_snake_end:
 
 
 clear_screen: 
+
 	; turn off lcd
 	ld a, 0
 	ld [rLCDC], a
@@ -343,15 +336,13 @@ cls_loop:
 
 
 
-get_index:
+get_vram_from_xy:
 	push af
+	ld de, 0
 rowsloop:
 	/*
 	store y coord in b and x in c
-	de is loaded with offset from
-	start of tile map vram, add to $9800
-	to get the memory address the tile
-	should go in
+	de is loaded with the address in vram
 	*/
 	ld a, $20     ; $20 (ie 32) is size of tilemap row in vram
 	add   a, e    ; A = A+L
@@ -371,6 +362,11 @@ rowsloopend:
     adc   a, d    ; A = A+L+H+carry
     sub   e       ; A = H+carry
     ld    d, a    ; H = H+carry
+
+    ld hl, $9800
+    add hl, de
+    ld d, h
+    ld e, l
     pop af
     ret
 
@@ -403,12 +399,6 @@ timer_overflow_end:
 	reti
 
 advance_snake:
-	di
-	ld hl, snake_changed
-	ld a, [hl]
-	cp a, 0
-	jp nz, advance_snake_end
-
 	ld a, [move_direction]
 	ld [last_direction], a
 	cp a, UP
@@ -501,12 +491,9 @@ adv_snake_loop:
 	push de ; de holds old position
 		push hl ; hl holds ptr into the array, pointing the the vram pointer of this iteration
 			; get new vram addr in de
-			ld de, 0
-			call get_index
-			ld hl, $9800
-			add hl, de
-			ld d, h
-			ld e, l
+			
+			call get_vram_from_xy
+
 		pop hl
 		push af
 			ld a, [hli]
@@ -519,6 +506,10 @@ adv_snake_loop:
 			ld [hli], a
 			ld a, e
 			ld [hli], a 
+
+			; set tile index
+			ld [hl], 1
+			inc hl
 		pop af
 	pop de ; de holds old x,y pos again
 	; swap de w/ bc
@@ -532,9 +523,6 @@ adv_snake_loop:
 	inc a
 	cp a, d
 	jp nz, adv_snake_loop
-	; set snake_changed flag
-	ld hl, snake_changed
-	ld [hl], 1
 advance_snake_end:
 	ld hl, snake_array
 	ld c, [hl]
@@ -570,6 +558,7 @@ self_collision_loop:
 mid_loop:
 		inc hl
 		; increment ptr
+		inc hl
 		inc hl
 		inc hl
 		inc d
@@ -698,8 +687,8 @@ DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
 DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
 DB $00,$00,$FF,$FF,$00,$FF,$00,$FF
 DB $00,$FF,$00,$FF,$FF,$FF,$00,$00
-DB $0E,$0E,$36,$36,$64,$64,$46,$46
-DB $FF,$FF,$FF,$99,$FF,$DF,$73,$73
+DB $1E,$1E,$34,$34,$64,$64,$46,$46
+DB $FF,$FF,$FF,$99,$FF,$DD,$77,$77
 TilesEnd:
 
 SECTION "Tilemap", ROM0
