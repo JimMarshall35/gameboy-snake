@@ -8,10 +8,12 @@ SECTION "variables", WRAM0
 	def SPRITE_HR equ	4
 	def SPRITE_L2R equ	14
 	def SPRITE_U2D equ	13
-	def SPRITE_R2D equ	9
-	def SPRITE_R2U equ	12
-	def SPRITE_L2D equ	10
-	def SPRITE_L2U equ	11
+
+	def SPRITE_R2D equ	10
+	def SPRITE_R2U equ	11
+	def SPRITE_L2D equ	9
+	def SPRITE_L2U equ	12
+
 	def SPRITE_TU equ	5
 	def SPRITE_TD equ	6
 	def SPRITE_TL equ	7
@@ -44,7 +46,9 @@ SECTION "variables", WRAM0
 	timer_overflow_counter: ds 1
 	should_advance: ds 1
 	food: ds 4 ; x, y, vram_address
-
+	new_tile: ds 1
+	last_tile: ds 1
+	snake_loop_counter: ds 1
 	; random number generation
 	Seed: ds 2
 	RandomPtr: ds 1
@@ -398,9 +402,81 @@ timer_overflow_end:
 	pop af
 	reti
 
+
+get_segment_tile:
+	; this direction in b, last direction in c
+	; returns the tile in a
+	ld a, c
+	cp a, UP
+	jp z, last_up
+	cp a, DOWN
+	jp z, last_down
+	cp a, LEFT
+	jp z, last_left
+	cp a, RIGHT
+	jp z, last_right
+last_up:
+	ld a, b
+	cp a, UP
+	jp z, u2d
+	cp a, LEFT
+	jp z, u2l
+	cp a, RIGHT
+	jp u2r
+last_down:
+	ld a, b
+	cp a, DOWN
+	jp z, u2d
+	cp a, LEFT
+	jp z, d2l
+	cp a, RIGHT
+	jp d2r
+last_left:
+	ld a, b
+	cp a, LEFT
+	jp z, l2r
+	cp a, UP
+	jp z, l2u
+	cp a, DOWN
+	jp l2d
+last_right:
+	ld a, b
+	cp a, RIGHT
+	jp z, l2r
+	cp a, UP
+	jp z, r2u
+	cp a, DOWN
+	jp r2d
+
+u2d:
+	ld a, SPRITE_U2D
+	jp get_segment_tile_end
+l2r:
+	ld a, SPRITE_L2R
+	jp get_segment_tile_end
+d2r:
+l2u:
+	ld a, SPRITE_L2U
+	jp get_segment_tile_end
+u2r:
+l2d:
+	ld a, SPRITE_L2D
+	jp get_segment_tile_end
+
+d2l:
+r2u:
+	ld a, SPRITE_R2U
+	jp get_segment_tile_end
+u2l:
+r2d:
+	ld a, SPRITE_R2D
+	jp get_segment_tile_end
+get_segment_tile_end:
+	ret
 advance_snake:
 	ld a, [move_direction]
-	ld [last_direction], a
+
+	;ld [last_direction], a
 	cp a, UP
 	jp z, up
 	cp a, DOWN
@@ -415,6 +491,12 @@ advance_snake:
 		if out of bounds goto advance snake end (for now)
 	*/
 up:
+	ld b, UP
+	ld a, [last_direction]
+	ld c, a
+	call get_segment_tile
+	ld [new_tile], a
+
 	ld hl, snake_array
 	ld a, [hli]
 	ld c, a
@@ -423,8 +505,15 @@ up:
 	cp a, 0
 	jp z, dead
 	ld b, a
+
 	jp check_food_eaten
 down:
+	ld b, DOWN
+	ld a, [last_direction]
+	ld c, a
+	call get_segment_tile
+	ld [new_tile], a
+
 	ld hl, snake_array
 	ld a, [hli]
 	ld c, a
@@ -436,6 +525,12 @@ down:
 	ld b, a
 	jp check_food_eaten
 left:
+	ld b, LEFT
+	ld a, [last_direction]
+	ld c, a
+	call get_segment_tile
+	ld [new_tile], a
+
 	ld hl, snake_array
 	ld a, [hli]
 	sub a, 1
@@ -446,6 +541,12 @@ left:
 	ld b, a
 	jp check_food_eaten
 right:
+	ld b, RIGHT
+	ld a, [last_direction]
+	ld c, a
+	call get_segment_tile
+	ld [new_tile], a
+
 	ld hl, snake_array
 	ld a, [hli]
 	add a, 1
@@ -455,6 +556,8 @@ right:
 	ld a, [hl]
 	ld b, a
 check_food_eaten:
+	ld a, [move_direction]
+	ld [last_direction], a
 	ld a, [food]
 	cp a, c
 	jp z, x_food_same
@@ -473,6 +576,7 @@ y_food_same:
 	pop bc
 adv_snake_loop_setup:
 	ld a, 0
+	ld [snake_loop_counter], a
 	ld hl, snake_array
 adv_snake_loop:
 	; store old x,y position in de
@@ -507,9 +611,47 @@ adv_snake_loop:
 			ld a, e
 			ld [hli], a 
 
-			; set tile index
-			ld [hl], 1
-			inc hl
+			ld a, [length]
+			ld a, [snake_loop_counter]
+			cp a, 0
+			jp z, is_head
+			ld a, [hl]
+			ld [last_tile], a
+			push af
+				; set tile index
+				ld a, [new_tile]
+				ld [hli], a
+			pop af
+			ld [new_tile], a
+			jp not_head
+is_head:
+		ld a, [move_direction]
+		cp a, UP
+		jp z, set_head_u
+		cp a, DOWN
+		jp z, set_head_d
+		cp a, LEFT
+		jp z, set_head_l
+		cp a, RIGHT
+		jp set_head_r
+set_head_u:
+		ld a, SPRITE_HU
+		ld [hli], a
+		jp head_end
+set_head_d:
+		ld a, SPRITE_HD
+		ld [hli], a
+		jp head_end
+set_head_r:
+		ld a, SPRITE_HR
+		ld [hli], a
+		jp head_end
+set_head_l:
+		ld a, SPRITE_HL
+		ld [hli], a
+		jp head_end
+not_head:
+head_end:
 		pop af
 	pop de ; de holds old x,y pos again
 	; swap de w/ bc
@@ -521,6 +663,7 @@ adv_snake_loop:
 		ld d, [hl]
 	pop hl
 	inc a
+	ld [snake_loop_counter], a
 	cp a, d
 	jp nz, adv_snake_loop
 advance_snake_end:
