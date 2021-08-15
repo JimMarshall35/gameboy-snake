@@ -10,7 +10,7 @@
 ;   Compression          : None.
 ;   Counter              : None.
 ;   Tile size            : 8 x 8
-;   Tiles                : 0 to 14
+;   Tiles                : 0 to 15
 ;
 ;   Palette colors       : None.
 ;   SGB Palette          : None.
@@ -54,5 +54,7 @@ DB $00,$00,$FF,$FF,$00,$FF,$00,$FF
 DB $00,$FF,$00,$FF,$FF,$FF,$00,$00
 DB $1E,$1E,$34,$34,$64,$64,$46,$46
 DB $FF,$FF,$FF,$99,$FF,$DD,$77,$77
+DB $18,$18,$10,$10,$38,$38,$54,$7C
+DB $A2,$DE,$A2,$DE,$54,$6C,$38,$38
 
 ; End of SNAKE2.Z80

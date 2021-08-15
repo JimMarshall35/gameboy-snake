@@ -18,7 +18,7 @@ SECTION "variables", WRAM0
 	def SPRITE_TD equ	6
 	def SPRITE_TL equ	7
 	def SPRITE_TR equ	8
-	def SPRITE_FOOD equ 15
+	def SPRITE_FOOD equ 16
  
 	def UP equ 0
 	def DOWN equ 1
@@ -264,7 +264,7 @@ iloop:
 	ld [hli], a
 
 	; set tile index
-	ld a, 1
+	ld a, SPRITE_U2D
 	ld [hli], a
 	
 	inc b
@@ -405,7 +405,9 @@ timer_overflow_end:
 
 get_segment_tile:
 	; this direction in b, last direction in c
-	; returns the tile in a
+	; returns the tile in a.
+	; When the snake advances, this is used to pick
+	; what the tile after the snakes head will be
 	ld a, c
 	cp a, UP
 	jp z, last_up
@@ -625,47 +627,50 @@ adv_snake_loop:
 			ld [new_tile], a
 			jp not_head
 is_head:
-		ld a, [move_direction]
-		cp a, UP
-		jp z, set_head_u
-		cp a, DOWN
-		jp z, set_head_d
-		cp a, LEFT
-		jp z, set_head_l
-		cp a, RIGHT
-		jp set_head_r
+			ld a, [move_direction]
+			cp a, UP
+			jp z, set_head_u
+			cp a, DOWN
+			jp z, set_head_d
+			cp a, LEFT
+			jp z, set_head_l
+			cp a, RIGHT
+			jp set_head_r
 set_head_u:
-		ld a, SPRITE_HU
-		ld [hli], a
-		jp head_end
+			ld a, SPRITE_HU
+			ld [hli], a
+			jp head_end
 set_head_d:
-		ld a, SPRITE_HD
-		ld [hli], a
-		jp head_end
+			ld a, SPRITE_HD
+			ld [hli], a
+			jp head_end
 set_head_r:
-		ld a, SPRITE_HR
-		ld [hli], a
-		jp head_end
+			ld a, SPRITE_HR
+			ld [hli], a
+			jp head_end
 set_head_l:
-		ld a, SPRITE_HL
-		ld [hli], a
-		jp head_end
+			ld a, SPRITE_HL
+			ld [hli], a
+			jp head_end
 not_head:
 head_end:
 		pop af
 	pop de ; de holds old x,y pos again
+
 	; swap de w/ bc
+
 	ld c, d
 	ld b, e ; bc now holds old position
-	push hl
+	push af
 		; get length in d for compare
-		ld hl, length
-		ld d, [hl]
-	pop hl
+		ld a, [length]
+		ld d, a
+	pop af
 	inc a
 	ld [snake_loop_counter], a
 	cp a, d
 	jp nz, adv_snake_loop
+	call set_tail
 advance_snake_end:
 	ld hl, snake_array
 	ld c, [hl]
@@ -724,6 +729,73 @@ no_collision:
 		jp end
 end:
 	pop hl
+	pop de
+	ret
+
+set_tail:
+	ld hl, snake_array
+	ld a, [length]
+	dec a
+	dec a
+	ld d, 0
+	ld e, SNAKE_SEGMENT_SIZE
+set_tail_mul_loop:
+	add hl, de
+	dec a
+	cp a, 0
+	jp nz, set_tail_mul_loop
+	ld c, [hl]
+	inc hl
+	ld b, [hl]
+
+	ld hl, snake_array
+	ld a, [length]
+	dec a
+	ld d, 0
+	ld e, SNAKE_SEGMENT_SIZE
+set_tail_mul_loop2:
+	add hl, de
+	dec a
+	cp a, 0
+	jp nz, set_tail_mul_loop2
+
+	push de
+		ld a, [hli]
+		ld e, a
+		ld a, [hli]
+		ld d, a
+		inc hl
+		inc hl
+		inc b
+		ld a, b
+		cp a, d
+		jp z, tail_up
+		dec b
+		dec b
+		ld a, b
+		cp a, d
+		jp z, tail_down
+		inc c
+		ld a, c
+		cp a, e
+		jp z, tail_left
+		dec c 
+		dec c
+		ld a, c
+		cp a, e
+		jp tail_right
+tail_up:
+	ld [hl], SPRITE_TU
+	jp tail_end
+tail_down:
+	ld [hl], SPRITE_TD
+	jp tail_end
+tail_left:
+	ld [hl], SPRITE_TL
+	jp tail_end
+tail_right:
+	ld [hl], SPRITE_TR
+tail_end:
 	pop de
 	ret
 
@@ -832,6 +904,8 @@ DB $00,$00,$FF,$FF,$00,$FF,$00,$FF
 DB $00,$FF,$00,$FF,$FF,$FF,$00,$00
 DB $1E,$1E,$34,$34,$64,$64,$46,$46
 DB $FF,$FF,$FF,$99,$FF,$DD,$77,$77
+DB $18,$18,$10,$10,$38,$38,$54,$7C
+DB $A2,$DE,$A2,$DE,$54,$6C,$38,$38
 TilesEnd:
 
 SECTION "Tilemap", ROM0
