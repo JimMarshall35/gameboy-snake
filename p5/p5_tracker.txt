@@ -1,0 +1,755 @@
+
+
+
+$$$Q$$$Q+.   .+Q$$$Q$$$ $$$Q$$$ .+Q$$$Q$$$  .+Q$$$Q+.   .+Q$$$Q+.  $$$Q$$$Q+.
+$$$P'`'4$$L j$$P'`'4$$$ $$$P'``j$$P'`'4$$$ j$$P'`'4$$L j$$P'`'4$$L $$$P'`'4$$L
+$$$     $$$ $$$     $$$ $$$    $$$     $$$ $$$     $$$ $$$     $$$ $$$     $$$
+$$$     $$$ $$$     $$$ $$$    $$$     $$$ $$$     $$$ $$$     $$$ $$$     $$$
+$$$ QQQ $$$ $$$ QQQ $$$ $$$ QQ $$$ QQQ $$$ $$$ QQQ $$$ $$$ QQQ $$$ $$$ QQQ $$$
+$$$k,.,d$$P :$$k,.,d$$$ $$$ QQ :$$k,.,d$$$ :$$k,.,d$$$ :$$k,.,d$$F $$$ QQQ $$$
+$$$Y$$$F*`.Q.`*7$$$F$$$ $$$ QQ; `*7$$$F$$$ .`*7$$$F$$$  `*7$$$F*`  ``` QQQ $$$
+$$$ ,.,q<QQQQQ>p,...........QQQ         qqqQQ>p .,d$$F QQ>p,.,q<QQQQQQQQQQqqqq
+qqqqQQQQQQQQQQQQQQQQQQQQQQQQQQQ $$$$$$$ QQQQQQQ $$F*`.<QQQQQQQQQQQQQQQQQQQQQQQ
+QQQQQQQQQQQQQQQQQQQQQQQQQQQQ QQ $$$'''' QQQQQQQqqqq<QQQQQQQQQQQQQQQQQQQQQQQQQQ
+                    ___  QQQ QQ $$$$$$Q+.`/
+                    QQQ  QQQ QQ `````'4$$L -
+             qq     QQQ  QQQ QQQQQQQ)  $$$ ;     g a m e b o y 
+      _      QQ     QQQ  QQQ QQQQQ ..,d$$F -             t r a c k e r
+      Q      QQ     QQQ  QQQ QQQQQ $$$F*` \
+Q     Q      QQ     QQQ  QQQ QQQQQ..., + `
+
+
+
+
+
+Paragon Five Gameboy Tracker documentation << by Andrew Lemon (2001)
+--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+Some info is extracted from the Paragon 5 tracker help file written
+by Stephane Hockenhull.  This info file is best viewed with a fixed 
+font.
+
+
+Included with these docs are several tunes:
+01 - Bob by Andrew Lemon
+02 - Ceramic Beats by Andrew Lemon
+03 - Station 0 by Andrew Lemon
+04 - Planet Fuzz by Jonne Valtonen
+
+mmmmmmmmmmmmmmmmmmmp.`4k.  `4QQQQQQQQQQQ QQQ ll  i    ;        .
+Table of Contents:  `t.`4k.  ``````4NNNN QQQ ll  i    ;        .
+   yymmmmmmmmmmmmmmmmmlt.`4kmmmmmmmmmmmmmNNN ll  i    ;        .
+
+1......License
+2......Disclaimer
+3......Getting Started
+4......Gameboy Sound Hardware + Limitations
+5......Important Things to Remember
+6......Keyboard Commands
+7......Note Effects
+8......Tutorial Song (ABC of Gameboy Tracking)
+9......WWW Links
+10.....Author's notes
+
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmp.`4k.  `4QQQQQQQQQQQ QQQ ll  i    ;        .
+1.)  License                       `t.`4k.  ``````4NNNN QQQ ll  i    ;        .
+   yymmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmlt.`4kmmmmmmmmmmmmmNNN ll  i    ;        .
+
+Paragon Five grants you a non-exclusive license to use the Software
+free of charge if your use of the Software is exclusively for non-
+commercial purposes.  For commercial inquiries contact Paul Bragiel
+at paul@paragon5.com.
+
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmp.`4k.  `4QQQQQQQQQQQ QQQ ll  i    ;        .
+2.)  Disclaimer of Warranty        `t.`4k.  ``````4NNNN QQQ ll  i    ;        .
+   yymmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmlt.`4kmmmmmmmmmmmmmNNN ll  i    ;        .
+Free of charge Software is provided on an "AS IS" basis, without
+warranty of any kind, including without limitation the warranties
+of merchantability, fitness for a particular purpose and non-
+infringement.  The entire risk as to the quality and performance of
+the Software is borne by you. Should the Software prove defective,
+you and not Paragon Five assume the entire cost of any service and
+repair.
+
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmp.`4k.  `4QQQQQQQQQQQ QQQ ll  i    ;        .
+3.)  Getting Started               `t.`4k.  ``````4NNNN QQQ ll  i    ;        .
+   yymmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmlt.`4kmmmmmmmmmmmmmNNN ll  i    ;        .
+First things first! - Have you ever tracked music before?
+If the answer is yes, then you will find this relatively easy to get into,
+especially if you have used Amiga Sound/Protracker, PC Screamtracker III or
+PC Fast Tracker II before.
+
+If the answer is no, then you'll have to do some practicing on PC based
+tracker and Beyond Tracker side by side, moving straight to doing 4 channel
+gameboy music is quite a difficult thing to do, but if you must, then have a
+go!  What have you got to lose?
+
+One very important point is even if you have done a lot of tracking before:
+the gameboy has only 4 channels of sound making equipment.  So if you are used
+to 64 channels of filtered stereophonic surround sound, you have a lot of
+adjustments to make if you want to master composing for this console.
+
+You have to remember that gameboy (from here referred to as GBC) music making
+is all about optimization of sound.  It's not the most powerful of sound
+hardware, coming in with about half the capabilities of the c64 SID chip.
+
+Second things last! - Read the following few chapters, jumping right in and
+trying to make GBC music without reading these docs will result in audio
+pain and possibly deafness.  :)
+
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmp.`4k.  `4QQQQQQQQQQQ QQQ ll  i   ;
+4.)  Gameboy Sound Hardware + Limitations  `t.`4k.  ``````4NNNN QQQ ll  i   ;
+   yymmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmlt.`4kmmmmmmmmmmmmmNNN ll  i   ;
+
+Here are some specifications on the Gameboy Color architecture:
+
+CPU: modified Z80 (missing and/or new opcodes)
+
+GB and GB pocket:
+  4K +128 Bytes of ram
+  4 Mhz (some say 1Mhz since all opcodes take a multiple of 4 cycles)
+GB Color:
+  32K +128 Bytes of ram
+  4Mhz (1Mhz) or 8Mhz (2Mhz) selectable
+
+All:
+  Custom sound circuitry with 4 generators.
+
+
+These in turn are compromised of:
+
+CHANNEL | TYPE
+#1| Square wave *4 types see diagrams below, plus frequency sweep
+#2| Square wave *4 types... no frequency sweep
+#3| Wave Channel. Can load a wave of 32bytes or a series of 32b waves
+#4| NOIZZZZE
+
+
+
+SQUARE WAVE DUTY SHAPES:
+
+00:					01:
+--------------------------------        --------------------------------
+   #############################        	########################
+   #						#
+   #						#
+   #						#
+####					#########
+--------------------------------        --------------------------------
+
+
+02:					03: (opposite of wave 01)
+--------------------------------        --------------------------------
+		################                                    ####
+		#						    #
+		#						    #	
+		#						    #
+#################			#############################
+--------------------------------        --------------------------------
+
+
+
+Now you see how the GBC makes its beep and blurp noises!  The next question is
+what the does the wave channel do?  That's a tricky question to answer, the
+best answer is, not much.
+
+You 'can' mangle it into actually sounding very nice, as some people know, but
+it takes practice.  For the purpose of this particular document I won't get
+into the wave channel too much, as that really should be covered in its
+own FAQ.
+
+The noise channel is another matter all together, it really does only what
+it says on the tin, it produces noise, lots of it.  Using the extended
+features of the tracker you can produce some very effective noise instruments
+like kickdrums, snares, hihats and aphex twin style gurglegrumble noises.
+
+As I explain it further down into the document, the noise channel isn't as
+useless as you first think.
+
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmp.`4k.  `4QQQQQQQQQQQ QQQ ll  i    ;        .
+5.)  Important Things to Remember  `t.`4k.  ``````4NNNN QQQ ll  i    ;        .
+   yymmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmlt.`4kmmmmmmmmmmmmmNNN ll  i    ;        .
+
+Just to recap, GBC music is based on 4channels of sound; two square wave
+channels, one wave channel, and one noise channel.
+
+
+- Channel 1 is identical to Channel 2 with the following exception:
+   Channel 1 has a frequency sweep function that channel 2 doesn't have.
+   That function can be used to create a similar basedrum so channel 1 might
+   be better used on music than SoundFX.
+
+- The envelope speed and direction can be changed when the channel is still
+  playing.  If it reach volume zero, changing the envelope wont work.
+  Instead, if the new setting is volume slide UP, volume will jump to 14
+  (0x0E) and stay there; if the new setting is volume slide DOWN, volume will
+  increase by 2 and stay there.
+  The current playing volume won't change unless the channel is restarted.
+
+____________________________________________________
+*- channel's 1 and 2 are Square wave generators:
+____________________________________________________
+    -volume envelope functions
+    -4 pulse width settings: 0: -_______ (12%)
+                             1: --______ (25%)
+                             2: ----____ (50%)
+                             3: ------__ (75%)
+    -free frequency setting of about 6 octaves wide
+    -only channel 1 has a frequency sweep function (slide up or down of pitch)
+____________________________________________________
+*- channel 3 is a digital wave loop output, it has:
+____________________________________________________
+    -only 4 volume settings: full (100%), half (50%), quarter (25%) and silent
+     (0%)
+    -only 32 samples of 4 bits in a loop, to allow making of about any
+     waveform
+    -you can trick channel 3 into playing long (more than 32smp) digital
+     sounds but the channel needs to be stopped, reloaded with the next 32
+     samples, then restarted adding terrible glitches on the audio
+    -none of the volume envelope functions
+    -free frequency setting of about 6 octaves wide (MUCH BETTER FOR BASE)
+____________________________________________________
+channel 4 is a noise generator it has:
+____________________________________________________
+    -volume envelope functions
+    -2 operating modes: 15 steps mode and 7 steps mode,
+     the 15 steps mode sound like noise
+     the 7 steps mode sound more like a buzz
+    -limited frequency settings using 2 variables:
+     X- 0 to 13
+     Y- 0 to 7    (for this 0 is considered like 0.5)
+
+     freq = (262144Hz / Y) SHR X
+
+     (SHR X means Shift Right (divided by '2 to the power of X') )
+
+     That gives the noise speed (at which rate the noise changes) but just
+     play around with the settings until you find the noise pitch you want.
+
+     X settings below 4 or 5 don't show up on the tracker because of the
+     44Khz mixing rate.
+
+     The gameboy has a much higher rate so it does make a difference on the
+     console.
+
+     Overall, the settings above are filtered by both the ear and internal
+     speaker & filter giving a softer white noise, but it doesn't sound
+     higher pitched than a setting of 4.
+
+
+volume envelope functions are the following:
+     -starting volume, from 0 to 15 (0 to F)
+     -volume slide Up or Down
+     -number of frames for every volume changes (0 to 7)
+      (there are 60 frames per second, 16.67ms)
+
+---------------//---------------//---------------//---------------//----------
+
+Instrument, wave and pattern names must be a 1 or 2 digit hex number followed
+by a ':' and an optional text name if the hex number is longer than two
+digits, not followed by a ':' or invalid the item wont be exported (useful
+to disable/swap instruments).
+
+Instrument and soundFX names have to be valid assembler labels, that is:
+  - no spaces
+  - letters A-Z, a-z (case sensitive)
+  - numbers 0-9
+  - underscore allowed '_'
+
+valid:invalid:
+"0:""0 piano"
+"1:snare"" 3:jumpsfx1"
+"5F:intro""3: jumpsfx2"
+
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmp.`4k.  `4QQQQQQQQQQQ QQQ ll  i    ;        .
+6.)  Keyboard Commands             `t.`4k.  ``````4NNNN QQQ ll  i    ;        .
+   yymmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmlt.`4kmmmmmmmmmmmmmNNN ll  i    ;        .
+
+    Main Gameboy Tracker Keys:
+
+    Ctrl+Q - Quit   = quits the tracker software
+    Ctrl+S - Save module  = saves current module
+    Ctrl+R - Open existing module = reads in a previously saved mgb file
+
+    F1 - Help  = online help (similar to this part of text)
+    F2 - Pattern editor  = tracker part
+    F3 - Instrument/SFX editor    = make your instrument / fx sounds here
+    F4 - Wave editor  = basic 32byte * N sample editor
+
+    F5 - Play song (with Shift for low-cpu usage)
+    F6 - Play pattern
+    F8 - Stop
+
+    F11 - Order list editor & misc options
+    F12 - System setup & messages (like directory setup)
+
+    TAB - cycle thru input fields
+    Shift+TAB - cycle backward thru input fields
+
+    ALT+F1 thru F4 - Mute Channel (see the X in the SFX Lock display on top)
+
+Breakdown of these global keys starts here:
+____________________________________________________
+F1 -> Online Help -
+____________________________________________________
+Speaks for itself, scroll through help text.
+
+____________________________________________________
+F2 -> Pattern Editor
+____________________________________________________
+Standard tracker style editor, more in-depth on this later.
+Use cursors to move around, tab to switch fields, KB keys for notes.
+
+____________________________________________________
+F3 -> Instrument Editor
+____________________________________________________
+
+Instrument/SFX editor keys:
+        ------------------------------------------------------
+        Alt+Space    -  Test SoundFX (no specified note)
+        Alt+NoteKey  -  Test Instrument/SoundFX (with specified note)
+
+        Ctrl+Shift+S -  Save current instrument (IGB format)
+        Ctrl+O       -  Open & Insert instrument (IGB format)
+        Ctrl+E       -  Export Instrument/SFX Bank
+        ------------------------------------------------------
+  Alt+space normally plays the instrument at "C" or at the last note
+  you played via ALT+NoteKey.  IGB format is the proprietary format
+  for saving instruments.
+
+
+Instrument list:
+        ------------------------------------------------------
+        Insert       -  Insert a new instrument after the current
+        Shift+Insert -  Insert a new instrument before the current
+        Alt+Del      -  Delete current instrument
+        ------------------------------------------------------
+
+Instrument editor:
+        ------------------------------------------------------
+        Insert       - Insert an empty row in the current channel before
+                        the current row
+        Shift+Insert - Insert an empty row in the current channel after
+                        the current row
+        Alt+Del      - Delete a row in the current channel
+        ------------------------------------------------------
+  The above keys are ones you will have to get very used to, its worth
+  printing out this section of the documentation for familiarizing
+  yourself with the Keyboard layout.
+
+____________________________________________________
+F4 -> Wave editor keys -
+____________________________________________________
+
+        Ctrl+Shift+S -  Save current audio wave (AGB format)
+        Ctrl+O       -  Open & Insert audio wave (AGB format)
+        Ctrl+I       -  Import & Insert audio wave (8 bit unsigned raw)
+        ------------------------------------------------------
+    (AGB format is what the tracker saves you samples into natively.)
+
+    (Saving an 8-bit sample is useful as you can use something like goldwave
+     -www.goldwave.com- to open and edit your wave, then simply re-insert
+      once you have finished your editing.)
+
+*    wave list:
+        ------------------------------------------------------
+        Ctrl+E       -  Export (source code $12, $34, ... hex format)
+        Insert       -  Insert a new audio wave after the current
+        Shift+Insert -  Insert a new audio wave before the current
+        Alt+Del      -  Delete current audio wave
+        ------------------------------------------------------
+*    waveform editor:
+        ------------------------------------------------------
+        Ctrl+H       -  Halve wave length by removing every 2nd sample
+        Ctrl+X       -  Remove N samples every 32 (number in dialog box)
+        Ctrl+M       -  Maximize wave volume
+        ------------------------------------------------------
+(You can use CTRL+H or CTRL+X to make your samples smaller,
+but they will lose definition.)
+
+____________________________________________________
+F5 -> Play Song -
+____________________________________________________
+
+Hit key to play song that you have loaded/tracked.  SHIFT+F5 allow for
+half of the cpu to be taken up in playing a song.  However, you won't
+receive as accurate info in the tracker playback screen.
+                        
+_________________________________________________
+Instrument/SFX commands:
+_________________________________________________
+
+E:v:d:s      -  Envelope:  (unsupported on channel 3)
+                            e= Initial Volume (0-F)
+                            d= Direction ('U'p or 'D'own)
+                            v= Speed (0-7) 0 being no change
+                                     1-7 number of frames per volume changes
+
+        E:d:s        -  Envelope:  (unsupported on channel 3, for instruments only)
+                            d=Direction ('U'p or 'D'own)
+                            s=Speed (0-7) 0 being no change
+                                     1-7 number of frames per volume changes
+                            (volume is set using the Vxx command in the
+                             pattern)
+
+        G:           -  Go: (for Instruments with note specified in pattern)
+
+        G:note       -  Go: (for SoundFX/Instruments without pattern note
+                                specified unsupported on channel 4)
+
+                            note = C0, C#1, D3, D#3, ... (octave range from
+                             0 to 5)
+
+				example:
+				e:d:d:0 g:c0
+
+				g:a0
+
+				g:c1
+
+				e
+
+        P:p          -  Panning:
+                            p = L(eft), R(ight), M(iddle)
+                            Note that middle is in fact BOTH channels on,
+                            it sounds twice as loud.
+
+        E            -  End:
+                            Release soundfx locking, for musical instruments
+                            end can be put right at the end of the instrument
+                            script.  For soundfx it is put on the frame
+                            where music can restart playing on that channel.
+                                            
+_________________________________________________
+*    Chnl 1 and 2: THE SQUARE WAVE CHANNEL
+_________________________________________________
+
+R:r      - pulse Ratio:  (length of square pulse)
+                        0: -_______
+                        1: --______
+                        2: ----____
+                        3: ------__
+
+			example:
+			e:d:D:0 g
+			r:2
+
+			r:1
+
+			r:0
+
+			e
+
+        F:s:d:h   - Frequency Sweep (only for channel 1)
+                        Don't forget to put one in every instrument that uses 				channel 1 as it is not reset when an instrument starts, 			another instrument or sound fx could have changed it.
+
+                        Speed: (0 - 7)
+                               0 = off
+                               x = x/128 of a second for every freq. changes
+                        Direction:
+                               'U'p or 'D'own
+                        sHifts: h = (0 - 7)
+                               new_freq = old_freq +/- (old_freq / (2 POW h))
+
+                               In other words the bigger the value, the
+                               smaller the change in the frequency for every
+                               single change.
+
+				example:
+
+				e:d:d:2 r:2 f:2:d:2 g e
+
+_________________________________________________
+*    Chnl 3: THE WAVE CHANNEL
+_________________________________________________
+
+        W:id     - ID of the wave to load into channel 3
+                       wave must be exactly 32 samples long
+
+        V:v      - Volume (0 - 3)
+                       0: Off
+                       1: 1/4 volume
+                       2: 1/2 volume
+                       3: full volume
+
+        X:id:s   - play long wave <id> at speed <s>
+                      wave length must be a multiple of 32
+
+                      s is the number of frames to pause
+                      after every chunk of 32 samples
+
+                      (0 = play at 1920Hz, 1= @ 960Hz,
+                      2 = @ 480Hz, ...)
+
+                      use C-1 or B-0 to play wave at 1920Hz
+                      C-0 for 960Hz
+        ------------------------------------------------------
+*    Chnl 4:
+        P:r:s:d  - Polynominal counter load:
+                       clock Ratio: (0 - 13)
+                           shift right the clock's frequency by r+1 bits
+                           (divided by 2 to the power of (r+1))
+                       Steps: (0 or 1)
+                           0: 15 steps (shhhhhhhh noise)
+                           1: 7 steps (buzzing noise)
+                       Divider: (0-7)
+                           re-divide the resulting frequency from the clock
+                           Ratio by (d) (0 is worth 0.5, multiplying by 2)
+
+Here are some nice example instruments
+(try printing this section out and copy to the tracker);
+_________________________________________________ 
+name:		channel 1 examples:
+_________________________________________________
+1:superdrum	e:d:d:2 f:2:d:2 g e
+
+2:bipp		e:a:d:1 f:0:d:2 g
+
+		e:0:D:0 g e
+
+3:pulser	e:d:d:0 f:0:D:0 g r:2
+		r:1 g
+
+		r:0 g
+
+		r:1 g
+
+		r:2 g
+
+		e 
+_________________________________________________
+		channel 2 examples:
+_________________________________________________
+4:ch2_bip	e:d:d:0 g
+
+		e:0:d:0 g e
+
+5:ch2_ping	e:6:u:4 g
+
+		e:8:d:4 g e
+_________________________________________________
+		channel 3 examples: (WAVE CHANNEL)
+_________________________________________________
+6:simplewave	v:3 w:0 g
+
+
+		e
+
+7:longwave	v:3 x:0:2 g e
+
+_________________________________________________
+		channel 4 examples: (Noise Channel)
+_________________________________________________
+8:shorthat	p:1:0:1 e:7:d:1 g e
+
+9:longhat	p:2:0:2 e:b:d:2 g e
+
+A:meatyhit	p:6:0:3 e:f:d:1 g e
+
+B:superbaphex	p:1:1:1 e:a:d:0 g
+
+		E:0:d:0 g
+
+		p:2:0:4 e:a:d:0 g
+
+		e:0:D:0 g
+
+		p:6:1:0 e:5:d:1 g e
+
+_________________________________________________
+
+Instruments are reordered on export so its fine to have them disordered in
+the instrument list and unused instrument numbers take space (8 bytes) in
+the instrument table, that is until I add song size optimizing functions
+for example if two instruments are used:
+
+"0:inst_A"
+"2:inst_B"
+
+This will create an empty instrument "1:" adding 8 useless bytes in the
+instrument table (unless that is wanted, for example: using instrument 1 in
+the song, with #1 being empty could allow for later instrument bank swapping
+for different song mood)
+
+Instrument numbers are in HEX (0,1,2,3,4,5,6,7,8,9,a,b,c,d,e,f, etc -> FF)
+
+Names will be prefixed by "SFX_" when exported (that is "1:ping" in the
+tracker will become "SFX_ping EQU 1" in the exported .inc file)
+
+Song making tip: just use all of these existing instrument examples - and
+construct a simple tune, maybe use some simple cords / arps (like L37 for 16
+rows then L38 for 16 then L47 for 32rows) with the pulser instrument...
+
+
+>>>>>>>>>>>>> Invalid names simply wont be exported... <<<-- REMEMBER THIS!!!
+
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmp.`4k.  `4QQQQQQQQQQQ QQQ ll  i    ;        .
+7.)  Note Effects                  `t.`4k.  ``````4NNNN QQQ ll  i    ;        .
+   yymmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmlt.`4kmmmmmmmmmmmmmNNN ll  i    ;        .
+
+*Commands:
+
++    Axx    - set speed for THIS row, speed will return to normal on the
+	      next row (00 = 256)
+
++    C00    - pattern end
++             pattern stop here, the next one will play right away without
+	      a pause, this is not exactly the same as a tracker break
+	      pattern fx-- its effected earlier :-)
+
++    Exy    + pitch slide down   y=number of frame per change
+
++    Fxy    + pitch slide up     x=value of changes - 1 (0 to 3)
+
++    H0y    + vibrato
++             y = speed/depth
+
++    Lxy    + arpeggio with halftones x and y
+
++    O00    + effect Off
+
++    V0x    - set starting volume of envelope
+
++    V3x    - set volume (only for channel 3)
+              0=off
+              1=25%
+              2=50%
+              3=100%
+
++    P0x    - Pulse Width (channel 1 and 2)
+              3= 75% ------__
+              2= 50% ----____
+              1= 25% --______
+              0= 12% -_______
+
++    Zxx    - Flag Command
+              used to send an arbitrary value to the game as music plays
+              to do some custom effect
+              xx = any values from 00 to FF
+
+           + (effects that stays on until turned off with O00)
+
+The best way for you to learn about note effects in gameboy tracking is to
+simply check out the simple demo tunes which are supplied with this document,
+check through the tune and look at the different effects and how they affect
+playback. Also check the next section as it details every bit of the songs
+creation. GOOD LUCK! :)
+
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmp.`4k.  `4QQQQQQQQQQQ QQQ ll  i    ;        .
+8.)  Tutorial Song (ABCs of GBT)   `t.`4k.  ``````4NNNN QQQ ll  i    ;        .
+   yymmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmlt.`4kmmmmmmmmmmmmmNNN ll  i    ;        .
+
+This guide assumes that you actually know how to operate the tracker via the
+KB and also that you have messed around with the example instruments and tune.
+If you haven't done these things, do them now before reading on, otherwise
+you'll get horribly confused :)
+
+DISCLAIMER: These are my personal views on GBC tracking, maybe you won't
+agree with them, but they are only here to get people started.  Hopefully
+they'll form a decent basis for beginners and experienced trackers alike.
+
+First off, the gameboy music chip is very underpowered, remember this.
+It was designed this way so as to reduce manufacturing cost and to be
+battery power conscious.
+
+It doesn't have strong bass, and using realistic sounding samples in your own
+tunes is troublesome (its not impossible - its just takes time).
+
+However, the good thing about the GBC sound chip is that is capable of doing
+a half decent c64 impression (though its not as powerful as the SID chip).
+Also, you can also mangle it into sounding like a pretty good retro-techno
+beatbox/synth with a little messing around.
+
+I'm splitting this section down into areas of interest. I knocked up a tune
+in 10mins to illustrate some of these points - also check out the other
+couple of tunes in the package for more interesting tricks.
+
+
+-a) Getting to grips with instruments and depth.
+	The gameboy is a curious little machine, comprised of the classic z80
+ 	and a super simple sound chip.
+
+	Firstly - get really into the instrument editor, this is really the
+	heart of the program as this is where your sounds are constructed.
+	Mess around on channels 1 & 2 with changing the REZ (r:X x being 0-3)
+	and spacing them out differently, you can create nice cheap filtering
+	fx with this sort of thing.  Check the example tune, the lead sample
+	is simple - but when mixed into the tune gives the music a lot more
+	depth.
+
+	To make your tunes sound like anything half decent - we have to trick
+	the listener into thinking more is happening within the tune.
+	As we are limited to 4 channels, then 3 with actual note data - we
+	have to rely on things like fill noise instruments and arpeggio
+        sounds.
+
+        Check the example tune, there are two levels of arps running at the
+	same time, giving the listener a lot to listen to, some of the other
+	example tunes are even more heavily reliant on arps and fills than
+	the example tune.  Remember though to spend time trying to give your
+	tunes depth - 4channels of sound is quite limiting - but it can also
+	force you to work harder and produce more interesting sounds and FX.
+
+-b) Percussion on the GBC
+	There are two schools of thought on this one.
+		1. Do I use channel 1 or channel 4 or even channel 3
+        	2. Use everything.
+	The only answer to which is better is really within your own head,
+	also its very dependant on what the project you are doing requires.
+	For example one of the included tunes uses ch1 and ch4, but even
+	uses high-pitched instrument drops to sound like effects.
+
+-c) Bass
+	The GBC has a low and slightly awful bass output, we can remedy this
+	a bit by using nice samples on ch3 - as this channel has a much
+	better frequency range than ch1+2.
+
+-d) Manual Arps
+	Whilst the tracker/player has an arp effect (LXX x being 00->FF) you
+	can also (for extra effect) construct your own arps.  Make sure the
+	songspeed is set to "02" or so, then simply select a cord (for example
+        e-a-c) then arrange the notes in some order down the pattern shifting
+        the rez (PXX in the channel FX).  This will create a pleasant phazing
+	effect over the arp. This way you can also make more complex arps than
+	the old mod arp fx effect allows.
+
+-e) Using Arp FX for tunes
+	An old amiga trick is to use an arp of CC or C0 (effect would be LCC
+        or LC0 on GBC), then apply it over your tune/lead sample channel, or
+	just alternate.
+
+	Now you have some idea of what we are covering in this guide, make
+	a song with the example instruments above; also try and create new
+	and exciting FX based around the above tips.  Create your 1st pattern
+	with a simple base line and melody, then add another pattern with
+	CTRL&+ keys, add in some of the example drums, then go to the order
+	list editor and join the two patterns.  00,01,x (x = loop to
+	start -> for a loop to specific pattern put the order number here
+	like x12 or something).
+
+>> Hit F5 - it should play your 1st GBC 2 pattern tune. Add more to it- be
+   creative, rip some of the example songs instruments and mess with them! :)
+
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmp.`4k.  `4QQQQQQQQQQQ QQQ ll  i    ;        .
+9.)  WWW Links                     `t.`4k.  ``````4NNNN QQQ ll  i    ;        .
+   yymmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmlt.`4kmmmmmmmmmmmmmNNN ll  i    ;        .
+
+> www.lfo.ukshells.co.uk  	Authors www site.
+> www.paragon5.com		Home of the Paragon Five gameboy tracker.
+
+mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmp.`4k.  `4QQQQQQQQQQQ QQQ ll  i    ;        .
+10.)  Author's Notes               `t.`4k.  ``````4NNNN QQQ ll  i    ;        .
+   yymmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmlt.`4kmmmmmmmmmmmmmNNN ll  i    ;        .
+
+I hope this documentation/tutorial helps.  If anyone is interested in
+contracting me for any music work (gbc/gba/console/film/tv/etc), please
+contact me at: lfo@ukshells.co.uk.
+                                                    .   _________
+QQQQQQQQQQP`     `'QQQQQQQP'`  .tQQQ       QQ     \     `^'<QQQQQ yyyyyyyyyy
+QQQQQQQQP` .qQ$$Qp. `4QQQ[   .tQQQQQ NNNNNNQQ:   -   .qZZp.  '/QQ NNNNNNNSSS
+QQQQQQP` .tNNNNNNNNk. `4QQk, `4QQQQQyyyyyy QQQk,_/  j$$$$$$k  :QQyyyyy   lll
+                                                             .\MMMMMMM   xxx
+                                                                         ___
+
+                                                                         ...
+
+

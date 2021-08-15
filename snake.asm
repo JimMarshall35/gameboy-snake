@@ -27,9 +27,9 @@ SECTION "variables", WRAM0
 	def STARTX equ 9
 	def STARTY equ 9
 
-	def SNAKE_MAX equ 100
+	def SNAKE_MAX equ 150
 	def SNAKE_SEGMENT_SIZE equ 5 ; some code segments have this hard coded as repeated inc hl's - check_self_collision does
-	def OVERFLOWS_UNTIL_MOVE equ 3 ; no of overflows from the timer before the snake moves 
+	def OVERFLOWS_UNTIL_MOVE equ 2 ; no of overflows from the timer before the snake moves 
 	/*
 		struct Segment{     // size SNAKE_SEGMENT_SIZE ie 4
 			char  x;
