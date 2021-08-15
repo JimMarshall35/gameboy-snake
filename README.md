@@ -1,4 +1,5 @@
 # gameboy-snake
+![alt text](https://github.com/JimMarshall35/gameboy-snake/blob/main/screenshot.png?raw=true)
 this is snake for the gameboy, it's still a work in progress.
 
 The basic game is complete, you can move the snake around, eat pellets and get longer. You die if you crash into yourself or the edges of the screen.
