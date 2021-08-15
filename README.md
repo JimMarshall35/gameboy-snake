@@ -1,4 +1,5 @@
 # gameboy-snake
+![alt text](https://github.com/JimMarshall35/gameboy-snake/blob/main/titlescreen.png?raw=true)
 ![alt text](https://github.com/JimMarshall35/gameboy-snake/blob/main/screenshot.png?raw=true)
 
 
