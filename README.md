@@ -8,7 +8,7 @@ The snake is part of the background tile layer to allow for a massive snake. The
 Made from the "Hello world" example here as a starting point: https://eldred.fr/gb-asm-tutorial/part1/hello_world.html
 
 To do:
--> make the correct tile be drawn for each part of the snake - mostly done -except for the tail
+-> make the correct tile be drawn for each part of the snake - done
 
 -> have timed food pellets that you have to be quick to reach in time before they disappear - these could be sprites that swoop in and out from off the screen
 
