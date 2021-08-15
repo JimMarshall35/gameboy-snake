@@ -6,7 +6,7 @@
 
 
 
-this is snake for the gameboy, basically complete but needs some embellishing.
+this is snake for the gameboy, basically complete but needs some embellishing. This repo includes the bgb emulator and tools for editing gameboy sprites - because they're both such small files.
 
 You can move the snake around, eat pellets and get longer. You die if you crash into yourself or the edges of the screen.
 
