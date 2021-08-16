@@ -15,6 +15,10 @@ The snake is part of the background tile layer to allow for a massive snake. The
 
 Made from the "Hello world" example here as a starting point: https://eldred.fr/gb-asm-tutorial/part1/hello_world.html
 
+All code in snake.asm. 
+
+RNG code taken from http://www.devrs.com/gb/asmcode.php#random
+
 To do:
 -> make the correct tile be drawn for each part of the snake - done
 
