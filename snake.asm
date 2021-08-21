@@ -30,6 +30,19 @@ SECTION "variables", WRAM0
 	def SNAKE_MAX equ 150
 	def SNAKE_SEGMENT_SIZE equ 5 ; some code segments have this hard coded as repeated inc hl's - check_self_collision does
 	def OVERFLOWS_UNTIL_MOVE equ 2 ; no of overflows from the timer before the snake moves 
+
+	def START_SIZE equ 6
+
+	def VBLANKS_UNTIL_SCROLL equ 6
+
+	def EMPTY_BG_FRAMES_START_OFFSET equ 43 * 16
+	def BLANK_TILE_START_OFFSET equ 47 * 16
+	def NUM_BG_FRAMES equ 4
+
+	def SCORE_HIGH_DIGIT_VRAM equ $9801
+	def SCORE_LOW_DIGIT_VRAM equ $9802
+
+	def HEX_DIGITS_START equ 48
 	/*
 		struct Segment{     // size SNAKE_SEGMENT_SIZE ie 4
 			char  x;
@@ -49,15 +62,18 @@ SECTION "variables", WRAM0
 	new_tile: ds 1
 	last_tile: ds 1
 	snake_loop_counter: ds 1
+	vblank_counter: ds 1
+	on_bg_frame: ds 1
+	new_score_flag: ds 1
 	; random number generation
 	Seed: ds 2
 	RandomPtr: ds 1
 
 
+
 SECTION	"Vblank",ROM0[$0040]
-	;call vram_set
-	reti
-	
+	call scroll_background
+	;reti
 SECTION	"stat",ROM0[$0048]
 	reti
 
@@ -131,6 +147,17 @@ WaitVBlank1:
 	ld a, %11100100
 	ld [rBGP], a
 
+	ld a, 0
+	ld [vblank_counter], a
+	ld [on_bg_frame], a
+	ld [should_advance], a
+	ld [new_score_flag], a
+
+
+	; enable vblank interrupt
+	ld hl, rIE
+	set 0, [hl] 
+	ei
 title_screen:
 	; check if start has been pressed
 	ld a, [rP1]
@@ -144,10 +171,20 @@ title_screen:
 	jp title_screen
 title_screen_end:
 
+	
+
 WaitVBlank5:
 	ld a, [rLY]
 	cp 144
 	jp c, WaitVBlank5
+
+	; set the bg tile to the first frame 
+	ld d, 0
+	ld e, 16
+	ld hl, Tiles + BLANK_TILE_START_OFFSET
+	ld bc, $9000
+	call memcpy_tile
+	; clear screen
 	call clear_screen
 
 	;initialize snake to its starting state
@@ -168,17 +205,17 @@ wait:            ;\
 	jr   nz,wait    ;/
 
 
-	; enable vblank interrupt
+	; disable vblank interrupt
 	ld hl, rIE
-	set 0, [hl] 
+	res 0, [hl] 
 	; enable timer interrupt
 	set 2, [hl]
+
 	
 
-
-	ei
-	ld a, 0
-	ld [should_advance], a
+	
+	;ei
+	
 MainLoop:
 	call poll_input
 	; check if the timer interrupt has signalled its time to advance the snake
@@ -203,6 +240,78 @@ advance:
 	ld [should_advance], a
 	; goto mainloop
 	jp MainLoop
+
+set_score:
+	push bc
+	push af
+		ld b, HEX_DIGITS_START
+		and %00001111
+		add a, b
+		ld [SCORE_LOW_DIGIT_VRAM], a
+	pop af
+		sra a
+		sra a
+		sra a
+		sra a
+		add a, b
+		ld [SCORE_HIGH_DIGIT_VRAM], a
+	pop bc
+	ret
+
+
+scroll_background:
+	push af
+	push hl
+	push bc
+	push de
+		ld a, [vblank_counter]
+		inc a
+		ld [vblank_counter], a
+		cp a, VBLANKS_UNTIL_SCROLL
+		jp nz, not_scroll
+scroll:
+		ld a, 0
+		ld [vblank_counter], a
+		ld a, [on_bg_frame]
+		inc a
+		ld [on_bg_frame], a
+		cp a, NUM_BG_FRAMES
+		jp nz, no_overflow
+frame_overflow:
+		ld a, 0
+		ld [on_bg_frame], a
+no_overflow:
+		ld hl, Tiles + EMPTY_BG_FRAMES_START_OFFSET
+		ld b, a
+		ld d, 0
+		ld e, 16
+tile_scroll_mul_loop:
+		ld a, b
+		cp a, 0
+		jp z, tile_scroll_mul_loop_end
+		add hl, de
+		dec b
+		jp tile_scroll_mul_loop
+tile_scroll_mul_loop_end:
+		ld bc, $9000
+		call memcpy_tile
+not_scroll:
+	pop de
+	pop bc
+	pop hl
+	pop af
+	reti
+
+memcpy_tile:
+bg_tile_memcpy_loop:
+	ld a, [hli]
+	ld [bc], a
+	inc bc
+	dec e
+	ld a, e
+	cp a, 0
+	jp nz, bg_tile_memcpy_loop
+	ret
 
 memset_snake:
 	ld hl, snake_array
@@ -249,10 +358,14 @@ set_pellet:
 	ret
 
 initialize_snake:
+	ld a, 0
+	call set_score
 	call set_pellet
 	;call memset_snake
-	ld a, 6
+	ld a, START_SIZE
 	ld [length], a
+	ld a, 1
+	ld [new_score_flag], a
 	ld a, UP
 	ld [move_direction], a
 
@@ -294,6 +407,17 @@ loop_exit:
 	ret
 
 vram_set: ; set snake tiles in vram 
+	ld a, [new_score_flag]
+	cp a, 1
+	jp nz, new_score_flag_not_set
+new_score_flag_set:
+	ld a, [length]
+	sub a, START_SIZE
+	call set_score
+	ld a, 0
+	ld [new_score_flag], a
+new_score_flag_not_set:
+	
 	; delete last tail
 	ld hl, last_tail
 	ld b, [hl]
@@ -594,9 +718,11 @@ y_food_same:
 	ld a, [length]
 	inc a
 	ld [length], a
+	ld a, 1
+	ld [new_score_flag], a
 	push bc
 		call set_pellet
-	pop bc
+	pop bc 
 adv_snake_loop_setup:
 	ld a, 0
 	ld [snake_loop_counter], a
@@ -895,48 +1021,48 @@ SECTION "Tile data", ROM0
 Tiles:
 DB $0F,$00,$0F,$00,$0F,$00,$0F,$00
 DB $F0,$00,$F0,$00,$F0,$00,$F0,$00
-DB $1F,$18,$27,$3C,$43,$7E,$A5,$FF
-DB $A5,$FF,$A5,$FF,$81,$FF,$C2,$7E
-DB $43,$7E,$81,$FF,$A5,$FF,$A5,$FF
-DB $A5,$FF,$C2,$7E,$E4,$3C,$F8,$18
-DB $1F,$1E,$21,$3F,$5C,$7F,$80,$FF
-DB $80,$FF,$DC,$7F,$E1,$3F,$FE,$1E
-DB $7F,$78,$87,$FC,$3B,$FE,$01,$FF
-DB $01,$FF,$3A,$FE,$84,$FC,$F8,$78
-DB $43,$7E,$43,$7E,$43,$7E,$43,$7E
-DB $C2,$7E,$C2,$7E,$E4,$3C,$F8,$18
-DB $1F,$18,$27,$3C,$43,$7E,$43,$7E
-DB $C2,$7E,$C2,$7E,$C2,$7E,$C2,$7E
-DB $0F,$00,$FF,$FC,$03,$FE,$01,$FF
-DB $01,$FF,$02,$FE,$FC,$FC,$F0,$00
-DB $0F,$00,$3F,$3F,$40,$7F,$80,$FF
-DB $80,$FF,$C0,$7F,$FF,$3F,$F0,$00
-DB $0F,$00,$1F,$1F,$20,$3F,$40,$7F
-DB $C0,$7F,$C0,$7F,$C3,$7F,$C2,$7E
-DB $0F,$00,$FF,$FC,$07,$FE,$03,$FE
-DB $02,$FE,$02,$FE,$C2,$FE,$C2,$7E
-DB $43,$7E,$C3,$FE,$03,$FE,$03,$FE
-DB $02,$FE,$04,$FC,$F8,$F8,$F0,$00
-DB $43,$7E,$43,$7F,$40,$7F,$40,$7F
-DB $C0,$7F,$E0,$7F,$FF,$3F,$F0,$00
-DB $43,$7E,$43,$7E,$43,$7E,$43,$7E
-DB $C2,$7E,$C2,$7E,$C2,$7E,$C2,$7E
-DB $0F,$00,$FF,$FF,$00,$FF,$00,$FF
-DB $00,$FF,$00,$FF,$FF,$FF,$F0,$00
-DB $1F,$1E,$3F,$34,$6F,$64,$4F,$46
-DB $FF,$FF,$FF,$99,$FF,$99,$F7,$77
-DB $1F,$18,$1F,$10,$3F,$38,$57,$7C
-DB $A2,$DE,$A2,$DE,$D4,$6C,$F8,$38
-DB $43,$7E,$43,$7F,$40,$7F,$40,$7F
-DB $C0,$7F,$C0,$7F,$C3,$7F,$C2,$7E
+DB $18,$18,$24,$3C,$42,$7E,$A5,$FF
+DB $A5,$FF,$A5,$FF,$81,$FF,$42,$7E
+DB $42,$7E,$81,$FF,$A5,$FF,$A5,$FF
+DB $A5,$FF,$42,$7E,$24,$3C,$18,$18
+DB $1E,$1E,$21,$3F,$5C,$7F,$80,$FF
+DB $80,$FF,$5C,$7F,$21,$3F,$1E,$1E
+DB $78,$78,$84,$FC,$3A,$FE,$01,$FF
+DB $01,$FF,$3A,$FE,$84,$FC,$78,$78
+DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
+DB $42,$7E,$42,$7E,$24,$3C,$18,$18
+DB $18,$18,$24,$3C,$42,$7E,$42,$7E
+DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
+DB $00,$00,$FC,$FC,$02,$FE,$01,$FF
+DB $01,$FF,$02,$FE,$FC,$FC,$00,$00
+DB $00,$00,$3F,$3F,$40,$7F,$80,$FF
+DB $80,$FF,$40,$7F,$3F,$3F,$00,$00
+DB $00,$00,$1F,$1F,$20,$3F,$40,$7F
+DB $40,$7F,$40,$7F,$43,$7F,$42,$7E
+DB $00,$00,$FC,$FC,$06,$FE,$02,$FE
+DB $02,$FE,$02,$FE,$C2,$FE,$42,$7E
+DB $42,$7E,$C2,$FE,$02,$FE,$02,$FE
+DB $02,$FE,$04,$FC,$F8,$F8,$00,$00
+DB $42,$7E,$43,$7F,$40,$7F,$40,$7F
+DB $40,$7F,$60,$7F,$3F,$3F,$00,$00
+DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
+DB $42,$7E,$42,$7E,$42,$7E,$42,$7E
+DB $00,$00,$FF,$FF,$00,$FF,$00,$FF
+DB $00,$FF,$00,$FF,$FF,$FF,$00,$00
+DB $1E,$1E,$34,$34,$64,$64,$46,$46
+DB $FF,$FF,$FF,$99,$FF,$99,$77,$77
+DB $18,$18,$10,$10,$38,$38,$54,$7C
+DB $A2,$DE,$A2,$DE,$54,$6C,$38,$38
+DB $42,$7E,$43,$7F,$40,$7F,$40,$7F
+DB $40,$7F,$40,$7F,$43,$7F,$42,$7E
 DB $42,$7E,$C2,$FE,$02,$FE,$02,$FE
 DB $02,$FE,$02,$FE,$C2,$FE,$42,$7E
 DB $FF,$FF,$81,$81,$81,$81,$F3,$F3
 DB $92,$92,$92,$92,$82,$82,$FE,$FE
 DB $FF,$FF,$99,$99,$F9,$F9,$99,$99
 DB $98,$98,$9A,$9A,$9A,$9A,$FF,$FF
-DB $EF,$E0,$2F,$20,$2F,$20,$2F,$20
-DB $30,$20,$B0,$A0,$B0,$A0,$F0,$E0
+DB $E0,$E0,$20,$20,$20,$20,$20,$20
+DB $20,$20,$A0,$A0,$A0,$A0,$E0,$E0
 DB $FF,$FF,$93,$93,$93,$93,$93,$93
 DB $83,$83,$AB,$AB,$AB,$AB,$FF,$FF
 DB $FF,$FF,$18,$18,$5B,$5B,$18,$18
@@ -947,49 +1073,92 @@ DB $FF,$FF,$49,$49,$49,$49,$C9,$C9
 DB $41,$41,$49,$49,$49,$49,$FF,$FF
 DB $FF,$FF,$89,$89,$A9,$A9,$89,$89
 DB $89,$89,$A8,$A8,$A8,$A8,$FF,$FF
-DB $FF,$F0,$9F,$90,$9F,$90,$9F,$90
+DB $F0,$F0,$90,$90,$90,$90,$90,$90
 DB $DC,$DC,$44,$44,$44,$44,$FC,$FC
-DB $7F,$7C,$C7,$C6,$93,$92,$B7,$B6
+DB $7C,$7C,$C6,$C6,$92,$92,$B6,$B6
 DB $E4,$E4,$EF,$EF,$81,$81,$FF,$FF
-DB $3F,$3C,$67,$66,$C3,$C3,$99,$99
-DB $99,$99,$C3,$C3,$E6,$66,$FC,$3C
-DB $3F,$38,$6F,$68,$4F,$48,$6F,$68
+DB $3C,$3C,$66,$66,$C3,$C3,$99,$99
+DB $99,$99,$C3,$C3,$66,$66,$3C,$3C
+DB $38,$38,$68,$68,$48,$48,$68,$68
 DB $28,$28,$28,$28,$28,$28,$38,$38
-DB $43,$7E,$C3,$FF,$42,$FF,$42,$FF
-DB $42,$FF,$42,$FF,$C3,$FF,$C2,$7E
-DB $0F,$00,$FF,$FF,$04,$FF,$02,$FF
-DB $02,$FF,$02,$FF,$C3,$FF,$C2,$7E
-DB $43,$7E,$C3,$FF,$40,$FF,$40,$FF
-DB $40,$FF,$40,$FF,$C3,$FF,$C2,$7E
-DB $43,$7E,$43,$7F,$42,$7F,$42,$7F
-DB $C2,$7F,$C2,$7F,$C3,$7F,$C2,$7E
-DB $43,$7E,$C3,$FE,$43,$FE,$43,$FE
-DB $42,$FE,$42,$FE,$C2,$FE,$C2,$7E
-DB $43,$7E,$7F,$7F,$C0,$FF,$00,$FF
-DB $00,$FF,$C0,$FF,$FF,$7F,$C2,$7E
-DB $43,$7E,$43,$7E,$43,$7E,$43,$7F
-DB $C3,$7F,$C2,$7E,$C2,$7E,$C2,$7E
-DB $43,$7E,$FF,$FF,$00,$FF,$00,$FF
-DB $00,$FF,$00,$FF,$FF,$FF,$C2,$7E
-DB $43,$7E,$C3,$FF,$40,$FF,$40,$FF
-DB $40,$FF,$20,$FF,$FF,$FF,$F0,$00
-DB $43,$7E,$5F,$7F,$60,$7F,$40,$7F
-DB $C0,$7F,$C0,$7F,$C3,$7F,$C2,$7E
-DB $43,$7E,$C3,$FF,$40,$FF,$40,$FF
-DB $40,$FF,$60,$FF,$DF,$FF,$C2,$7E
-DB $0F,$00,$0F,$00,$0F,$00,$0F,$00
-DB $F0,$00,$F4,$24,$F8,$18,$F8,$18
+DB $42,$7E,$C3,$FF,$42,$FF,$42,$FF
+DB $42,$FF,$42,$FF,$C3,$FF,$42,$7E
+DB $00,$00,$FF,$FF,$04,$FF,$02,$FF
+DB $02,$FF,$02,$FF,$C3,$FF,$42,$7E
+DB $42,$7E,$C3,$FF,$40,$FF,$40,$FF
+DB $40,$FF,$40,$FF,$C3,$FF,$42,$7E
+DB $42,$7E,$43,$7F,$42,$7F,$42,$7F
+DB $42,$7F,$42,$7F,$43,$7F,$42,$7E
+DB $42,$7E,$C2,$FE,$42,$FE,$42,$FE
+DB $42,$FE,$42,$FE,$C2,$FE,$42,$7E
+DB $42,$7E,$7F,$7F,$C0,$FF,$00,$FF
+DB $00,$FF,$C0,$FF,$7F,$7F,$42,$7E
+DB $42,$7E,$42,$7E,$42,$7E,$43,$7F
+DB $43,$7F,$42,$7E,$42,$7E,$42,$7E
+DB $42,$7E,$FF,$FF,$00,$FF,$00,$FF
+DB $00,$FF,$00,$FF,$FF,$FF,$42,$7E
+DB $42,$7E,$C3,$FF,$40,$FF,$40,$FF
+DB $40,$FF,$20,$FF,$FF,$FF,$00,$00
+DB $42,$7E,$5F,$7F,$60,$7F,$40,$7F
+DB $40,$7F,$40,$7F,$43,$7F,$42,$7E
+DB $42,$7E,$C3,$FF,$40,$FF,$40,$FF
+DB $40,$FF,$60,$FF,$DF,$FF,$42,$7E
+DB $00,$00,$00,$00,$00,$00,$00,$00
+DB $00,$00,$24,$24,$18,$18,$18,$18
 DB $0F,$00,$0F,$00,$0F,$00,$0F,$00
 DB $F0,$00,$F0,$00,$F0,$00,$F0,$00
+DB $87,$00,$87,$00,$87,$00,$78,$00
+DB $78,$00,$78,$00,$78,$00,$87,$00
+DB $C3,$00,$C3,$00,$3C,$00,$3C,$00
+DB $3C,$00,$3C,$00,$C3,$00,$C3,$00
+DB $E1,$00,$1E,$00,$1E,$00,$1E,$00
+DB $1E,$00,$E1,$00,$E1,$00,$E1,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00
+DB $FF,$FF,$C3,$C3,$99,$99,$BD,$BD
+DB $BD,$BD,$99,$99,$C3,$C3,$FF,$FF
+DB $FF,$FF,$E7,$E7,$F7,$F7,$F7,$F7
+DB $F7,$F7,$F7,$F7,$F7,$F7,$FF,$FF
+DB $FF,$FF,$C3,$C3,$BB,$BB,$FB,$FB
+DB $F3,$F3,$CF,$CF,$81,$81,$FF,$FF
+DB $FF,$FF,$C3,$C3,$99,$99,$FD,$FD
+DB $E1,$E1,$B9,$B9,$C3,$C3,$FF,$FF
+DB $FF,$FF,$BF,$BF,$B7,$B7,$B7,$B7
+DB $81,$81,$F7,$F7,$F7,$F7,$FF,$FF
+DB $FF,$FF,$83,$83,$BF,$BF,$83,$83
+DB $F3,$F3,$F3,$F3,$83,$83,$FF,$FF
+DB $FF,$FF,$C3,$C3,$9D,$9D,$87,$87
+DB $B3,$B3,$BB,$BB,$C3,$C3,$FF,$FF
+DB $FF,$FF,$C1,$C1,$DD,$DD,$F9,$F9
+DB $FB,$FB,$E3,$E3,$CF,$CF,$FF,$FF
+DB $FF,$FF,$C3,$C3,$BD,$BD,$BD,$BD
+DB $C3,$C3,$BD,$BD,$C3,$C3,$FF,$FF
+DB $FF,$FF,$C1,$C1,$DD,$DD,$C1,$C1
+DB $F9,$F9,$F3,$F3,$E7,$E7,$FF,$FF
+DB $F7,$F7,$E3,$E3,$E9,$E9,$CD,$CD
+DB $C0,$C0,$9C,$9C,$9D,$9D,$FF,$FF
+DB $FF,$FF,$83,$83,$D9,$D9,$D9,$D9
+DB $C3,$C3,$DD,$DD,$81,$81,$FF,$FF
+DB $FF,$FF,$C3,$C3,$9D,$9D,$BF,$BF
+DB $BF,$BF,$99,$99,$C3,$C3,$FF,$FF
+DB $FF,$FF,$83,$83,$D9,$D9,$DD,$DD
+DB $DD,$DD,$D9,$D9,$83,$83,$FF,$FF
+DB $83,$83,$B9,$B9,$AD,$AD,$8F,$8F
+DB $AD,$AD,$B9,$B9,$83,$83,$FF,$FF
+DB $FF,$FF,$81,$81,$DD,$DD,$C7,$C7
+DB $D7,$D7,$DF,$DF,$8F,$8F,$FF,$FF
+DB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+DB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+
 
 TilesEnd:
 
 SECTION "Tilemap", ROM0
 
 Tilemap:
-DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+DB $40,$30,$30,$40,$40,$40,$40,$40,$40,$40
+DB $40,$40,$40,$40,$40,$40,$40,$40,$40,$40
+DB $40,$40,$40,$40,$40,$40,$40,$40,$40,$00
 DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
