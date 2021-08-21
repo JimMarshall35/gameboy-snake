@@ -183,6 +183,7 @@ title_screen:
 	jp z, title_screen_end
 	jp title_screen
 title_screen_end:
+	call gbt_stop
 
 	
 
@@ -237,6 +238,7 @@ MainLoop:
 	; if it is, goto advance
 	jp z, advance
 	; if not goto mainloop
+	halt
 	jp MainLoop
 advance:
 	di
