@@ -1,4 +1,7 @@
 INCLUDE "hardware.inc"
+INCLUDE "gbt_player.inc"
+
+EXPORT  song_data
 def VBLANK_IE_BIT equ 0
 SECTION "variables", WRAM0
 
@@ -96,8 +99,8 @@ SECTION "Header", ROM0[$100]
 
 EntryPoint:
 	; Shut down audio circuitry
-	ld a, 0
-	ld [rNR52], a
+	;ld a, 0
+	;ld [rNR52], a
 
 	; Do not turn the LCD off outside of VBlank
 WaitVBlank:
@@ -158,7 +161,17 @@ WaitVBlank1:
 	ld hl, rIE
 	set 0, [hl] 
 	ei
+
+	ld      de,song_data
+    ld      bc,BANK(song_data)
+    
+    ld      a,$05
+    call    gbt_play ; Play song
+    ld a, 2
+    call gbt_loop
 title_screen:
+	halt
+	call    gbt_update ; Update player
 	; check if start has been pressed
 	ld a, [rP1]
 	and %11011111
