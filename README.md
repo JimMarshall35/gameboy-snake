@@ -24,7 +24,7 @@ To do:
 
 -> have timed food pellets that you have to be quick to reach in time before they disappear - these could be sprites that swoop in and out from off the screen
 
--> add music
+-> add music - GTB player library added - plays the sample tune during the title screen (https://github.com/AntonioND/gbt-player)
 
 -> add scoring, score display on the top row of tiles - done, sort of (score displayed in hex)
 
