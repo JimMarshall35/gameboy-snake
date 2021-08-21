@@ -4,7 +4,8 @@ INCLUDE "gbt_player.inc"
 EXPORT  song_data
 def VBLANK_IE_BIT equ 0
 SECTION "variables", WRAM0
-
+	def PLAYFIELD_HEIGHT equ 18
+	def PLAYFIELD_WIDTH equ 20
 	def SPRITE_HU equ	1
 	def SPRITE_HD equ	2
 	def SPRITE_HL equ	3
@@ -22,6 +23,7 @@ SECTION "variables", WRAM0
 	def SPRITE_TL equ	7
 	def SPRITE_TR equ	8
 	def SPRITE_FOOD equ 16
+	def SPRITE_CHERRY equ 15
  
 	def UP equ 0
 	def DOWN equ 1
@@ -38,8 +40,9 @@ SECTION "variables", WRAM0
 
 	def VBLANKS_UNTIL_SCROLL equ 6
 
+	def BLANK_TILE_INDEX equ 47
 	def EMPTY_BG_FRAMES_START_OFFSET equ 43 * 16
-	def BLANK_TILE_START_OFFSET equ 47 * 16
+	def BLANK_TILE_START_OFFSET equ BLANK_TILE_INDEX * 16
 	def NUM_BG_FRAMES equ 4
 
 	def SCORE_HIGH_DIGIT_VRAM equ $9801
@@ -47,7 +50,7 @@ SECTION "variables", WRAM0
 
 	def HEX_DIGITS_START equ 48
 	/*
-		struct Segment{     // size SNAKE_SEGMENT_SIZE ie 4
+		struct Segment{     // size SNAKE_SEGMENT_SIZE ie 5
 			char  x;
 			char  y;
 			char* tile_addr; // tile address in vram
@@ -68,6 +71,23 @@ SECTION "variables", WRAM0
 	vblank_counter: ds 1
 	on_bg_frame: ds 1
 	new_score_flag: ds 1
+	/* 
+		struct Cherry{
+			char x;
+			char y;
+			char* tile_addr;
+			char  advance_countdown;
+		}
+	*/
+	def CHERRY_X_OFFSET equ 0
+	def CHERRY_Y_OFFSET equ 1
+	def CHERRY_ADDR_OFFSET equ 2
+	def CHERRY_COUNTDOWN_OFFSET equ  4
+	def CHERRY_LIFETIME equ 20 ; cherry lasts 10 advances of the snake
+	def CHERRY_SIZE equ 5
+	cherry: ds CHERRY_SIZE
+	cherry_flag: ds 1 ; is the cherry active
+
 	; random number generation
 	Seed: ds 2
 	RandomPtr: ds 1
@@ -345,35 +365,65 @@ h_matches:
 l_matches:
 	ret
 
+
+set_cherry:
+	push bc
+		call RandomNumber_LUT
+		and %00001111
+		inc a
+		ld [cherry + CHERRY_X_OFFSET], a 
+
+		call RandomNumber_LUT
+		and %00001111
+		inc a
+		ld [cherry + CHERRY_Y_OFFSET], a 
+
+		ld b, a
+		ld a, [cherry + CHERRY_X_OFFSET]
+		ld c, a
+
+		call get_vram_from_xy
+		ld h, d
+		ld l, e
+		ld a, h
+		ld [cherry + CHERRY_ADDR_OFFSET], a
+		ld a, l
+		ld [cherry + CHERRY_ADDR_OFFSET + 1], a
+
+		ld a, CHERRY_LIFETIME
+		ld [cherry + CHERRY_COUNTDOWN_OFFSET], a
+	pop bc
+	ret
+
 set_pellet:
-	call RandomNumber
-	and %00001111
-	inc a
-	ld [food], a 
+	push bc
+		call RandomNumber_LUT
+		and %00001111
+		inc a
+		ld [food], a 
 
-	call RandomNumber
-	and %00001111
-	inc a
-	ld [food + 1], a 
+		call RandomNumber_LUT
+		and %00001111
+		inc a
+		ld [food + 1], a 
 
+		ld b, a
+		ld a, [food]
+		ld c, a
 
-	
-
-	ld b, a
-	ld a, [food]
-	ld c, a
-
-	call get_vram_from_xy
-	ld h, d
-	ld l, e
-	ld a, h
-	ld [food + 2], a
-	ld a, l
-	ld [food + 3], a
+		call get_vram_from_xy
+		ld h, d
+		ld l, e
+		ld a, h
+		ld [food + 2], a
+		ld a, l
+		ld [food + 3], a
+	pop bc
 	ret
 
 initialize_snake:
 	ld a, 0
+	ld [cherry_flag], a
 	call set_score
 	call set_pellet
 	;call memset_snake
@@ -422,6 +472,23 @@ loop_exit:
 	ret
 
 vram_set: ; set snake tiles in vram 
+	ld a, [cherry_flag]
+	cp a, 1
+	jp nz, cherry_flag_not_set
+	ld a, [cherry + CHERRY_ADDR_OFFSET]
+	ld h, a
+	ld a, [cherry + CHERRY_ADDR_OFFSET + 1]
+	ld l, a
+	ld [hl], SPRITE_CHERRY
+	jp cherry_flag_set
+cherry_flag_not_set:
+	ld a, [cherry + CHERRY_ADDR_OFFSET]
+	ld h, a
+	ld a, [cherry + CHERRY_ADDR_OFFSET + 1]
+	ld l, a
+	ld [hl], BLANK_TILE_INDEX
+cherry_flag_set:
+
 	ld a, [new_score_flag]
 	cp a, 1
 	jp nz, new_score_flag_not_set
@@ -440,7 +507,7 @@ new_score_flag_not_set:
 	ld c, [hl]
 	ld h, b
 	ld l, c
-	ld [hl], 0
+	ld [hl], BLANK_TILE_INDEX
 
 	; prepare for loop
 	ld a, [length]
@@ -635,7 +702,23 @@ r2d:
 	jp get_segment_tile_end
 get_segment_tile_end:
 	ret
+update_cherry:
+	ld a, [cherry + CHERRY_COUNTDOWN_OFFSET]
+	dec a
+	ld [cherry + CHERRY_COUNTDOWN_OFFSET], a
+	cp a, 0
+	jp nz, update_cherry_end
+	ld a, 0
+	ld [cherry_flag], a
+update_cherry_end:
+	ret
+
 advance_snake:
+	ld a, [cherry_flag]
+	cp a, 1
+	jp nz, cherry_flag_reset
+	call update_cherry
+cherry_flag_reset:
 	ld a, [move_direction]
 
 	;ld [last_direction], a
@@ -682,7 +765,7 @@ down:
 	ld a, [hl]
 	dec hl
 	add a, 1
-	cp a, 18
+	cp a, PLAYFIELD_HEIGHT
 	jp z, dead
 	ld b, a
 	jp check_food_eaten
@@ -712,7 +795,7 @@ right:
 	ld hl, snake_array
 	ld a, [hli]
 	add a, 1
-	cp a, $14
+	cp a, PLAYFIELD_WIDTH
 	jp z, dead
 	ld c, a
 	ld a, [hl]
@@ -735,9 +818,20 @@ y_food_same:
 	ld [length], a
 	ld a, 1
 	ld [new_score_flag], a
-	push bc
-		call set_pellet
-	pop bc 
+	call set_pellet
+	ld a, [cherry_flag]
+	cp a, 0
+	jp nz, adv_snake_loop_setup
+
+	call RandomNumber_LUT
+	and %00001111
+	cp a, 0
+	jp nz, adv_snake_loop_setup
+	
+	ld a, 1
+	ld [cherry_flag], a
+	call set_cherry
+
 adv_snake_loop_setup:
 	ld a, 0
 	ld [snake_loop_counter], a
@@ -981,7 +1075,7 @@ poll_input:
 
 	jp poll_input_end
 up_pressed:
-	call RandomNumber
+	call RandomNumber_LUT
 	ld a, [last_direction]
 	cp a, UP
 	jp z, poll_input_end
@@ -991,7 +1085,7 @@ up_pressed:
 	ld [move_direction], a
 	jp poll_input_end
 down_pressed:
-	call RandomNumber
+	call RandomNumber_LUT
 	ld hl, move_direction
 	ld a, [last_direction]
 	cp a, UP
@@ -1002,7 +1096,7 @@ down_pressed:
 	ld [move_direction], a
 	jp poll_input_end
 left_pressed:
-	call RandomNumber
+	call RandomNumber_LUT
 	ld hl, move_direction
 	ld a, [last_direction]
 	cp a, LEFT
@@ -1013,7 +1107,7 @@ left_pressed:
 	ld [move_direction], a
 	jp poll_input_end
 right_pressed:
-	call RandomNumber
+	call RandomNumber_LUT
 	ld hl, move_direction
 	ld a, [last_direction]
 	cp a, LEFT
