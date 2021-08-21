@@ -26,6 +26,6 @@ To do:
 
 -> add music
 
--> add scoring, score display on the top row of tiles
+-> add scoring, score display on the top row of tiles - done, sort of
 
 -> stop food from spawning in the snake (food can sometimes spawn in the exact same place it was just eaten from - making it look like the snake didn't eat the food)
