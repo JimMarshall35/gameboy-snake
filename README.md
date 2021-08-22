@@ -19,6 +19,8 @@ All code in snake.asm.
 
 RNG code taken from http://www.devrs.com/gb/asmcode.php#random
 
+All artwork created by me, including fonts / numbers. The music is from the gbt-player example project.
+
 To do:
 -> make the correct tile be drawn for each part of the snake - done
 
