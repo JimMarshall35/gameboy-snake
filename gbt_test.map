@@ -1,152 +1,158 @@
 ROM0 bank #0:
+  SECTION: $0000-$0029 ($002a bytes) ["sound effects code"]
+           $0000 = eaten_sound_effect
+           $0015 = die_sound_effect
+  SECTION: $002a-$003e ($0015 bytes) ["score code"]
+           $002a = set_score
   SECTION: $0040-$0042 ($0003 bytes) ["Vblank"]
   SECTION: $0048-$0048 ($0001 byte) ["stat"]
   SECTION: $0050-$0052 ($0003 bytes) ["timer"]
   SECTION: $0058-$0058 ($0001 byte) ["serial"]
   SECTION: $0060-$0060 ($0001 byte) ["joypad"]
-  SECTION: $0100-$075c ($065d bytes) ["Header"]
-           $0150 = EntryPoint
-           $0150 = WaitVBlank
-           $0164 = CopyTiles
-           $0176 = CopyTilemap
-           $0183 = WaitVBlank1
-           $01b2 = title_screen
-           $01c9 = title_screen_end
-           $01cc = WaitVBlank5
-           $01f5 = wait
-           $020c = MainLoop
-           $021c = advance
-           $0220 = WaitVBlank2
-           $0233 = set_score
-           $0248 = scroll_background
-           $0258 = scroll
-           $0269 = frame_overflow
-           $026e = no_overflow
-           $0276 = tile_scroll_mul_loop
-           $0281 = tile_scroll_mul_loop_end
-           $0287 = not_scroll
-           $028c = memcpy_tile
-           $028c = bg_tile_memcpy_loop
-           $0297 = memset_snake
-           $029a = memset_loop
-           $02a6 = h_matches
-           $02af = l_matches
-           $02b0 = set_cherry
-           $02dc = set_pellet
-           $0303 = initialize_snake
-           $0327 = iloop
-           $0349 = loop_exit
-           $034a = vram_set
-           $035f = cherry_flag_not_set
-           $0369 = cherry_flag_set
-           $0371 = new_score_flag_set
-           $037e = new_score_flag_not_set
-           $0392 = segment_loop
-           $03a5 = segment_loop_end
-           $03b0 = clear_screen
-           $03b7 = cls_loop
-           $03cb = get_vram_from_xy
-           $03cf = rowsloop
-           $03e0 = rowsloopend
-           $03ee = timer_overflow
-           $040b = timer_overflow_end
-           $0410 = get_segment_tile
-           $0425 = last_up
-           $0435 = last_down
-           $0445 = last_left
-           $0455 = last_right
-           $0465 = u2d
-           $046a = l2r
-           $046f = d2r
-           $046f = l2u
-           $0474 = u2r
-           $0474 = l2d
-           $0479 = d2l
-           $0479 = r2u
-           $047e = u2l
-           $047e = r2d
-           $0483 = get_segment_tile_end
-           $0484 = update_cherry
-           $0495 = update_cherry_end
-           $0496 = eaten_sound_effect
-           $04ab = die_sound_effect
-           $04c0 = advance_snake
-           $04cb = cherry_flag_reset
-           $04e5 = up
-           $0502 = down
-           $0520 = left
-           $053d = right
-           $0557 = check_food_eaten
-           $0567 = x_food_same
-           $0571 = y_food_same
-           $059d = adv_snake_loop_setup
-           $05a5 = adv_snake_loop
-           $05de = is_head
-           $05f5 = set_head_u
-           $05fb = set_head_d
-           $0601 = set_head_r
-           $0607 = set_head_l
-           $060d = not_head
-           $060d = head_end
-           $0622 = advance_snake_end
-           $0631 = dead
-           $063b = check_self_collision
-           $0648 = self_collision_loop
-           $064d = mid_loop
-           $065a = same_x
-           $0662 = same_y
-           $0667 = no_collision
-           $066c = end
-           $066f = set_tail
-           $067b = set_tail_mul_loop
-           $0690 = set_tail_mul_loop2
-           $06b8 = tail_up
-           $06bd = tail_down
-           $06c2 = tail_left
-           $06c7 = tail_right
-           $06c9 = tail_end
-           $06cb = poll_input
-           $06ec = up_pressed
-           $0704 = down_pressed
-           $071f = left_pressed
-           $073a = right_pressed
-           $0752 = poll_input_end
-  SECTION: $075d-$0b6c ($0410 bytes) ["Tile data"]
-           $075d = Tiles
-           $0b6d = TilesEnd
-  SECTION: $0b6d-$0ed8 ($036c bytes) ["Tilemap"]
-           $0b6d = Tilemap
-           $0dad = TilemapEnd
-           $0dad = RandomNumber
-           $0dc6 = RandomNumber_LUT
-           $0dd6 = RandomNumber_LUT.skip
-           $0dd9 = RandTable
-  SECTION: $0ed9-$10dc ($0204 bytes) ["GBT_BANK0"]
-           $0ed9 = gbt_get_pattern_ptr
-           $0efb = gbt_get_pattern_ptr_banked
-           $0f0d = gbt_get_pattern_ptr_banked.dont_loop
-           $0f13 = gbt_play
-           $0fbf = gbt_pause
-           $0fc8 = gbt_pause.gbt_pause_unmute
-           $0fcd = gbt_loop
-           $0fd1 = gbt_stop
-           $0fdc = gbt_enable_channels
-           $0fe0 = gbt_update
-           $0ffa = gbt_update.dontexit
-           $1022 = gbt_update.dont_stop
-           $1035 = gbt_update.copy_loop
-           $1042 = gbt_update.more_bytes
-           $1049 = gbt_update.one_more_byte
-           $104c = gbt_update.no_more_bytes_this_channel
-           $108b = gbt_update.loop_disabled
-           $1090 = gbt_update.dont_increment_pattern
-           $1090 = gbt_update.not_ended
-           $1090 = gbt_update.end_handling_steps_pattern
-           $10c0 = gbt_update.next_channel
-           $10cb = gbt_update.next_channel_more_bytes
-           $10d0 = gbt_update.next_channel_one_more_byte
-           $10d1 = gbt_update.next_channel_no_more_bytes_this_channel
-    SLACK: $301a bytes
+  SECTION: $0061-$00f2 ($0092 bytes) ["input code"]
+           $0061 = poll_input
+           $0082 = up_pressed
+           $009a = down_pressed
+           $00b5 = left_pressed
+           $00d0 = right_pressed
+           $00e8 = poll_input_end
+  SECTION: $0100-$014f ($0050 bytes) ["Header"]
+  SECTION: $0150-$055f ($0410 bytes) ["Tile data"]
+           $0150 = Tiles
+           $0560 = TilesEnd
+  SECTION: $0560-$0906 ($03a7 bytes) ["snake code"]
+           $0560 = init_snake_vars
+           $0569 = initialize_snake
+           $058d = iloop
+           $05af = loop_exit
+           $05b0 = vram_set
+           $05c5 = cherry_flag_not_set
+           $05cf = cherry_flag_set
+           $05d7 = new_score_flag_set
+           $05e4 = new_score_flag_not_set
+           $05f8 = segment_loop
+           $060b = segment_loop_end
+           $0616 = clear_screen
+           $061d = cls_loop
+           $0631 = get_vram_from_xy
+           $0635 = rowsloop
+           $0646 = rowsloopend
+           $0654 = timer_overflow
+           $0671 = timer_overflow_end
+           $0676 = get_segment_tile
+           $068b = last_up
+           $069b = last_down
+           $06ab = last_left
+           $06bb = last_right
+           $06cb = u2d
+           $06d0 = l2r
+           $06d5 = d2r
+           $06d5 = l2u
+           $06da = u2r
+           $06da = l2d
+           $06df = d2l
+           $06df = r2u
+           $06e4 = u2l
+           $06e4 = r2d
+           $06e9 = get_segment_tile_end
+           $06ea = update_cherry
+           $06fb = update_cherry_end
+           $06fc = advance_snake
+           $0707 = cherry_flag_reset
+           $0721 = up
+           $073e = down
+           $075c = left
+           $0779 = right
+           $0793 = check_food_eaten
+           $07a3 = x_food_same
+           $07ad = y_food_same
+           $07d9 = adv_snake_loop_setup
+           $07e1 = adv_snake_loop
+           $081a = is_head
+           $0831 = set_head_u
+           $0837 = set_head_d
+           $083d = set_head_r
+           $0843 = set_head_l
+           $0849 = not_head
+           $0849 = head_end
+           $085e = advance_snake_end
+           $086d = dead
+           $0877 = check_self_collision
+           $0884 = self_collision_loop
+           $0889 = mid_loop
+           $0896 = same_x
+           $089e = same_y
+           $08a3 = no_collision
+           $08a8 = end
+           $08ab = set_tail
+           $08b7 = set_tail_mul_loop
+           $08cc = set_tail_mul_loop2
+           $08f4 = tail_up
+           $08f9 = tail_down
+           $08fe = tail_left
+           $0903 = tail_right
+           $0905 = tail_end
+  SECTION: $0907-$0b46 ($0240 bytes) ["Tilemap"]
+           $0907 = Tilemap
+           $0b47 = TilemapEnd
+  SECTION: $0b47-$0d4a ($0204 bytes) ["GBT_BANK0"]
+           $0b47 = gbt_get_pattern_ptr
+           $0b69 = gbt_get_pattern_ptr_banked
+           $0b7b = gbt_get_pattern_ptr_banked.dont_loop
+           $0b81 = gbt_play
+           $0c2d = gbt_pause
+           $0c36 = gbt_pause.gbt_pause_unmute
+           $0c3b = gbt_loop
+           $0c3f = gbt_stop
+           $0c4a = gbt_enable_channels
+           $0c4e = gbt_update
+           $0c68 = gbt_update.dontexit
+           $0c90 = gbt_update.dont_stop
+           $0ca3 = gbt_update.copy_loop
+           $0cb0 = gbt_update.more_bytes
+           $0cb7 = gbt_update.one_more_byte
+           $0cba = gbt_update.no_more_bytes_this_channel
+           $0cf9 = gbt_update.loop_disabled
+           $0cfe = gbt_update.dont_increment_pattern
+           $0cfe = gbt_update.not_ended
+           $0cfe = gbt_update.end_handling_steps_pattern
+           $0d2e = gbt_update.next_channel
+           $0d39 = gbt_update.next_channel_more_bytes
+           $0d3e = gbt_update.next_channel_one_more_byte
+           $0d3f = gbt_update.next_channel_no_more_bytes_this_channel
+  SECTION: $0d4b-$0e76 ($012c bytes) ["rng code"]
+           $0d4b = RandomNumber
+           $0d64 = RandomNumber_LUT
+           $0d74 = RandomNumber_LUT.skip
+           $0d77 = RandTable
+  SECTION: $0e77-$0f51 ($00db bytes) ["main"]
+           $0e77 = EntryPoint
+           $0e77 = WaitVBlank
+           $0e8b = CopyTiles
+           $0e9d = CopyTilemap
+           $0eaa = WaitVBlank1
+           $0ed1 = title_screen
+           $0ee8 = title_screen_end
+           $0eeb = WaitVBlank5
+           $0f14 = wait
+           $0f2b = MainLoop
+           $0f3b = advance
+           $0f3f = WaitVBlank2
+  SECTION: $0f52-$0fa9 ($0058 bytes) ["scroll effect code"]
+           $0f52 = init_scroll_effect_vars
+           $0f5b = scroll_background
+           $0f6b = scroll
+           $0f7c = frame_overflow
+           $0f81 = no_overflow
+           $0f89 = tile_scroll_mul_loop
+           $0f94 = tile_scroll_mul_loop_end
+           $0f9a = not_scroll
+           $0f9f = memcpy_tile
+           $0f9f = bg_tile_memcpy_loop
+  SECTION: $0faa-$0ffc ($0053 bytes) ["food code"]
+           $0faa = set_cherry
+           $0fd6 = set_pellet
+    SLACK: $3029 bytes
 
 ROMX bank #1:
   SECTION: $4000-$4646 ($0647 bytes) ["GBT_BANK1"]
@@ -252,52 +258,56 @@ ROMX bank #1:
     SLACK: $33ff bytes
 
 WRAM0 bank #0:
-  SECTION: $c000-$c307 ($0308 bytes) ["variables"]
+  SECTION: $c000-$c2f6 ($02f7 bytes) ["variables"]
            $c000 = snake_array
            $c2ee = last_tail
-           $c2f0 = last_direction
-           $c2f1 = move_direction
-           $c2f2 = length
-           $c2f3 = timer_overflow_counter
-           $c2f4 = should_advance
-           $c2f5 = food
-           $c2f9 = new_tile
-           $c2fa = last_tile
-           $c2fb = snake_loop_counter
-           $c2fc = vblank_counter
-           $c2fd = on_bg_frame
-           $c2fe = new_score_flag
-           $c2ff = cherry
-           $c304 = cherry_flag
-           $c305 = Seed
-           $c307 = RandomPtr
-  SECTION: $c308-$c348 ($0041 bytes) ["GBT_VAR_1"]
-           $c308 = gbt_playing
-           $c309 = gbt_pattern_array_ptr
-           $c30b = gbt_pattern_array_bank
-           $c30c = gbt_speed
-           $c30d = gbt_temp_play_data
-           $c319 = gbt_loop_enabled
-           $c31a = gbt_ticks_elapsed
-           $c31b = gbt_current_step
-           $c31c = gbt_current_pattern
-           $c31d = gbt_current_step_data_ptr
-           $c31f = gbt_current_step_data_bank
-           $c320 = gbt_channels_enabled
-           $c321 = gbt_pan
-           $c325 = gbt_vol
-           $c329 = gbt_instr
-           $c32d = gbt_freq
-           $c333 = gbt_channel3_loaded_instrument
-           $c334 = gbt_arpeggio_freq_index
-           $c33d = gbt_arpeggio_enabled
-           $c340 = gbt_arpeggio_tick
-           $c343 = gbt_cut_note_tick
-           $c347 = gbt_have_to_stop_next_step
-           $c348 = gbt_update_pattern_pointers
+           $c2f0 = length
+           $c2f1 = timer_overflow_counter
+           $c2f2 = should_advance
+           $c2f3 = new_tile
+           $c2f4 = last_tile
+           $c2f5 = snake_loop_counter
+           $c2f6 = new_score_flag
+  SECTION: $c2f7-$c337 ($0041 bytes) ["GBT_VAR_1"]
+           $c2f7 = gbt_playing
+           $c2f8 = gbt_pattern_array_ptr
+           $c2fa = gbt_pattern_array_bank
+           $c2fb = gbt_speed
+           $c2fc = gbt_temp_play_data
+           $c308 = gbt_loop_enabled
+           $c309 = gbt_ticks_elapsed
+           $c30a = gbt_current_step
+           $c30b = gbt_current_pattern
+           $c30c = gbt_current_step_data_ptr
+           $c30e = gbt_current_step_data_bank
+           $c30f = gbt_channels_enabled
+           $c310 = gbt_pan
+           $c314 = gbt_vol
+           $c318 = gbt_instr
+           $c31c = gbt_freq
+           $c322 = gbt_channel3_loaded_instrument
+           $c323 = gbt_arpeggio_freq_index
+           $c32c = gbt_arpeggio_enabled
+           $c32f = gbt_arpeggio_tick
+           $c332 = gbt_cut_note_tick
+           $c336 = gbt_have_to_stop_next_step
+           $c337 = gbt_update_pattern_pointers
+  SECTION: $c338-$c341 ($000a bytes) ["food variables"]
+           $c338 = food
+           $c33c = cherry
+           $c341 = cherry_flag
+  SECTION: $c342-$c344 ($0003 bytes) ["rng variables"]
+           $c342 = Seed
+           $c344 = RandomPtr
+  SECTION: $c345-$c346 ($0002 bytes) ["scroll effect variables"]
+           $c345 = vblank_counter
+           $c346 = on_bg_frame
+  SECTION: $c347-$c348 ($0002 bytes) ["input variables"]
+           $c347 = last_direction
+           $c348 = move_direction
     SLACK: $0cb7 bytes
 
 USED:
-    ROM0: $0fe6 bytes in 1 bank
+    ROM0: $0fd7 bytes in 1 bank
     ROMX: $0c01 bytes in 1 bank
     WRAM0: $0349 bytes in 1 bank
