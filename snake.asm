@@ -245,10 +245,13 @@ wait:            ;\
 	; enable timer interrupt
 	set 2, [hl]
 
-	
+	ld a, $ff
+	ld [rNR52], a
 
-	
-	;ei
+	ld a, %01110111
+	ld [rNR50], a
+	ld a, $ff
+	ld [rNR51], a
 	
 MainLoop:
 	call poll_input
@@ -284,10 +287,8 @@ set_score:
 		add a, b
 		ld [SCORE_LOW_DIGIT_VRAM], a
 	pop af
-		sra a
-		sra a
-		sra a
-		sra a
+		swap a
+		and %00001111
 		add a, b
 		ld [SCORE_HIGH_DIGIT_VRAM], a
 	pop bc
@@ -713,6 +714,44 @@ update_cherry:
 update_cherry_end:
 	ret
 
+
+eaten_sound_effect:
+	; set sweep period
+	ld a, $15
+	ld [rNR10], a
+	; set length, duty
+	ld a, $96
+	ld [rNR11], a
+	; set volume, envelope
+	ld a, $73
+	ld [rNR12], a
+	;set frequency
+	ld a, $bb
+	ld [rNR13], a
+	; enable length for sound chip
+	ld a, $85
+	ld [rNR14], a
+	ret
+
+die_sound_effect:
+	; set sweep period
+	ld a, $4f
+	ld [rNR10], a
+	; set length, duty
+	ld a, $96
+	ld [rNR11], a
+	; set volume, envelope
+	ld a, $b7
+	ld [rNR12], a
+	;set frequency
+	ld a, $bb
+	ld [rNR13], a
+	; enable length for sound chip
+	ld a, $85
+	ld [rNR14], a
+	ret
+
+
 advance_snake:
 	ld a, [cherry_flag]
 	cp a, 1
@@ -819,6 +858,7 @@ y_food_same:
 	ld a, 1
 	ld [new_score_flag], a
 	call set_pellet
+	call eaten_sound_effect
 	ld a, [cherry_flag]
 	cp a, 0
 	jp nz, adv_snake_loop_setup
@@ -937,7 +977,7 @@ advance_snake_end:
 	jp z, dead
 	ret
 dead:
-	
+	call die_sound_effect
 	call initialize_snake
 	call clear_screen
 	ret
