@@ -57,17 +57,10 @@ CopyTiles:
 	jp nz, CopyTiles
 
 	; Copy the tilemap
-	ld de, Tilemap
+	ld de, title_screen_map
 	ld hl, $9800
-	ld bc, TilemapEnd - Tilemap
-CopyTilemap:
-	ld a, [de]
-	ld [hli], a
-	inc de
-	dec bc
-	ld a, b
-	or a, c
-	jp nz, CopyTilemap
+	ld bc, title_screen_map_end - title_screen_map
+	call CopyTilemap
 
 	; Turn the LCD on
 	ld a, LCDCF_ON | LCDCF_BGON
@@ -112,7 +105,7 @@ title_screen:
 	jp title_screen
 title_screen_end:
 	call gbt_stop
-
+	
 	
 
 WaitVBlank5:
@@ -120,15 +113,20 @@ WaitVBlank5:
 	cp 144
 	jp c, WaitVBlank5
 
-	; set the bg tile to the first frame 
+	; set the bg tile to the blank tile 
 	ld d, 0
 	ld e, 16
 	ld hl, Tiles + BLANK_TILE_START_OFFSET
 	ld bc, $9000
 	call memcpy_tile
 	; clear screen
-	call clear_screen
+	;call clear_screen
+	ld de, game_screen_map
+	ld hl, $9800
+	ld bc, game_screen_map_end - game_screen_map
 
+	call CopyTilemap
+	call clear_screen
 	;initialize snake to its starting state
 	call initialize_snake
 
@@ -186,3 +184,15 @@ advance:
 	ld [should_advance], a
 	; goto mainloop
 	jp MainLoop
+
+
+
+CopyTilemap:
+	ld a, [de]
+	ld [hli], a
+	inc de
+	dec bc
+	ld a, b
+	or a, c
+	jp nz, CopyTilemap
+	ret

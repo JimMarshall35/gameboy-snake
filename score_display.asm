@@ -4,8 +4,10 @@
 
 INCLUDE "sprite_defs.inc"
 
-def SCORE_HIGH_DIGIT_VRAM equ $9801
-def SCORE_LOW_DIGIT_VRAM equ $9802
+def SCORE_HIGH_DIGIT_VRAM equ $9807
+def SCORE_LOW_DIGIT_VRAM equ $9808
+def HI_SCORE_HIGH_DIGIT equ $9810
+def HI_SCORE_LOW_DIGIT equ $9811
 
 section "score code", ROM0
 set_score:
