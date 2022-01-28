@@ -29,3 +29,6 @@ To do:
 -> add scoring, score display on the top row of tiles - done, sort of (score displayed in hex)
 
 -> stop food from spawning in the snake (food can sometimes spawn in the exact same place it was just eaten from - making it look like the snake didn't eat the food)
+
+28/01/2022
+This guy https://www.facebook.com/sloopygoop made me some music for it which i'm going to properly add soon, and finish off the game soon when i get chance. right now it plays his title theme tune but it doesn't sound right.
