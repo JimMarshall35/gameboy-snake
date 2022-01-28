@@ -247,17 +247,25 @@ ROMX bank #1:
            $4607 = gbt_ch1234_speed
            $460f = gbt_update_bank1
            $462a = gbt_update_effects_bank1
-  SECTION: $4647-$47c4 ($017e bytes) ["song_1"]
-           $4647 = song_1
-  SECTION: $47c5-$493f ($017b bytes) ["song_2"]
-           $47c5 = song_2
-  SECTION: $4940-$4aaf ($0170 bytes) ["song_3"]
-           $4940 = song_3
-  SECTION: $4ab0-$4bf1 ($0142 bytes) ["song_0"]
-           $4ab0 = song_0
-  SECTION: $4bf2-$4c00 ($000f bytes) ["song_data"]
-           $4bf2 = song_data
-    SLACK: $33ff bytes
+  SECTION: $4647-$47cc ($0186 bytes) ["song_4"]
+           $4647 = song_4
+  SECTION: $47cd-$494d ($0181 bytes) ["song_5"]
+           $47cd = song_5
+  SECTION: $494e-$4acc ($017f bytes) ["song_6"]
+           $494e = song_6
+  SECTION: $4acd-$4c44 ($0178 bytes) ["song_3"]
+           $4acd = song_3
+  SECTION: $4c45-$4da3 ($015f bytes) ["song_0"]
+           $4c45 = song_0
+  SECTION: $4da4-$4efa ($0157 bytes) ["song_2"]
+           $4da4 = song_2
+  SECTION: $4efb-$504d ($0153 bytes) ["song_1"]
+           $4efb = song_1
+  SECTION: $504e-$514f ($0102 bytes) ["song_7"]
+           $504e = song_7
+  SECTION: $5150-$516d ($001e bytes) ["song_data"]
+           $5150 = song_data
+    SLACK: $2e92 bytes
 
 WRAM0 bank #0:
   SECTION: $c000-$c2f6 ($02f7 bytes) ["variables"]
@@ -311,5 +319,5 @@ WRAM0 bank #0:
 
 USED:
     ROM0: $1377 bytes in 1 bank
-    ROMX: $0c01 bytes in 1 bank
+    ROMX: $116e bytes in 1 bank
     WRAM0: $0349 bytes in 1 bank

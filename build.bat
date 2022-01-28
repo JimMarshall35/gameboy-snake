@@ -1,4 +1,4 @@
-mod2gbt\mod2gbt template.mod song
+mod2gbt\mod2gbt titlescreen.mod song
 rgbasm -ogbt_player.o gbt_player.asm
 rgbasm -ogbt_player_bank1.o gbt_player_bank1.asm
 rgbasm -osong.o song.asm
